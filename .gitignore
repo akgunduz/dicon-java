@@ -30,4 +30,4 @@ Tests/
 MatrixTests/
 Objects/
 out/
-*.iml
+build/
