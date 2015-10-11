@@ -100,8 +100,8 @@ public abstract class BaseMessage implements MessageCallback {
         streamFlag = flag;
     }
 
-    int getType() {
-        return header.type;
+    MessageTypes getType() {
+        return MessageTypes.getMessage(header.type);
     }
 
     long getOwnerAddress() {

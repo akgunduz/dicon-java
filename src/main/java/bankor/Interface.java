@@ -16,7 +16,7 @@ public abstract class Interface implements SchedulerCallback, Runnable {
     protected static final byte SHUTDOWN_NOTIFIER = 'Q';
 
     boolean initialized = false;
-    protected Address address;
+    protected long address;
     Scheduler scheduler;
     Pipe notifier;
     Selector selector;
@@ -28,7 +28,7 @@ public abstract class Interface implements SchedulerCallback, Runnable {
 
     abstract boolean init(int index);
     abstract void onReceive();
-    abstract void onSend(Address address, Message msg);
+    abstract void onSend(long address, Message msg);
 
     public Interface(Interfaces type, int interfaceIndex, final InterfaceCallback receiverCallback, String rootPath) {
 
@@ -77,7 +77,7 @@ public abstract class Interface implements SchedulerCallback, Runnable {
     }
 
     @Override
-    public boolean onProcess(final Address address, final Message msg) {
+    public boolean onProcess(final long address, final Message msg) {
 
         class OneShotTask implements Runnable {
             public void run() {
@@ -95,9 +95,9 @@ public abstract class Interface implements SchedulerCallback, Runnable {
         onReceive();
     }
 
-    boolean push(MessageDirection type, Address target, Message msg) {
+    boolean push(MessageDirection type, long target, Message msg) {
 
-        Interfaces _interface = target.getInterface();
+        Interfaces _interface = Address.getInterface(target);
         if (_interface == getType()) {
 
             scheduler.push(type, target, msg);
@@ -109,10 +109,10 @@ public abstract class Interface implements SchedulerCallback, Runnable {
 
     }
 
-    Address getAddress() {
+    long getAddress() {
 
         if (!initialized) {
-            return null;
+            return 0;
         }
 
         return address;

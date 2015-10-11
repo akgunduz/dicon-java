@@ -27,7 +27,7 @@ public class Net extends Interface {
 
     private ServerSocketChannel server;
 
-    private String selectedIP;
+    private long selectedIP;
 
 
     public Net(int index, final InterfaceCallback cb, String rootPath) {
@@ -67,7 +67,7 @@ public class Net extends Interface {
             while (addresses.hasMoreElements()) {
                 InetAddress inetAddress=addresses.nextElement();
                 if (inetAddress != null && inetAddress instanceof Inet4Address) {
-                    selectedIP = inetAddress.getHostAddress();
+                    selectedIP = NetAddress.getIP(inetAddress.getAddress());
                     break;
                 }
             }
@@ -90,9 +90,9 @@ public class Net extends Interface {
 
             try {
 
-                server.socket().bind(new InetSocketAddress(((NetAddress) address).getPort()));
-                System.out.println("Socket opened at ip :" + ((NetAddress) address).getIPstr() +
-                        " port : " + ((NetAddress) address).getPort());
+                server.socket().bind(new InetSocketAddress(NetAddress.getPort(address)));
+                System.out.println("Socket opened at ip :" + NetAddress.getIPstr(address) +
+                        " port : " + NetAddress.getPort(address));
 
                 server.register(selector, SelectionKey.OP_ACCEPT);
 
@@ -130,7 +130,7 @@ public class Net extends Interface {
     @Override
     void setAddress(int index) {
 
-        address = new NetAddress(selectedIP, DEFAULT_PORT + portOffset++);
+        address = NetAddress.parseAddress(selectedIP, DEFAULT_PORT + portOffset++);
 
     }
 
@@ -164,7 +164,7 @@ public class Net extends Interface {
                                 try {
 
                                     if (msg.readFromStream(client)) {
-                                        push(MessageDirection.MESSAGE_RECEIVE, new NetAddress(msg.getOwnerAddress()), msg);
+                                        push(MessageDirection.MESSAGE_RECEIVE, msg.getOwnerAddress(), msg);
 
                                     } else {
                                         client.finishConnect();
@@ -201,17 +201,17 @@ public class Net extends Interface {
 
 
     @Override
-    void onSend(Address target, Message msg) {
+    void onSend(long target, Message msg) {
 
         SocketChannel socket = null;
 
         try {
 
-            InetAddress serverAddr = ((NetAddress)target).getInetAddress();
+            InetAddress serverAddr = NetAddress.getInetAddress(target);
             socket = SocketChannel.open();
-            socket.connect(new InetSocketAddress(serverAddr, ((NetAddress) target).getPort()));
+            socket.connect(new InetSocketAddress(serverAddr, NetAddress.getPort(target)));
 
-            msg.setOwnerAddress(getAddress().address);
+            msg.setOwnerAddress(getAddress());
             msg.writeToStream(socket);
 
         } catch (Exception e) {

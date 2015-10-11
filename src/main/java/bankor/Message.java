@@ -10,9 +10,9 @@ import java.util.List;
  */
 public class Message extends BaseMessage {
 
-    private static final int STREAM_RULE = 0x01;
-    private static final int STREAM_BINARY = 0x02;
-    private static final int STREAM_MD5ONLY = 0x03;
+    public static final int STREAM_RULE = 0x01;
+    public static final int STREAM_BINARY = 0x02;
+    public static final int STREAM_MD5ONLY = 0x03;
 
     private static final int BLOCK_FILE_BINARY = 0x01;
     private static final int BLOCK_FILE_MD5 = 0x02;
@@ -22,7 +22,7 @@ public class Message extends BaseMessage {
 
     private Rule rule;
     private String rootPath;
-    private List<ByteBuffer> md5List;
+    public List<ByteBuffer> md5List;
 
     public Message(String rootPath) {
 
@@ -30,9 +30,9 @@ public class Message extends BaseMessage {
         this.rootPath = rootPath;
     }
 
-    public Message(HostTypes owner, int type, String rootPath) {
+    public Message(HostTypes owner, MessageTypes type, String rootPath) {
 
-        super(owner.getId(), type);
+        super(owner.getId(), type.getId());
         this.rule = null;
         this.rootPath = rootPath;
 
@@ -41,6 +41,10 @@ public class Message extends BaseMessage {
 
     HostTypes getOwner() {
         return HostTypes.getHost((int)getDeviceID());
+    }
+
+    public Rule getRule() {
+        return rule;
     }
 
     void setRule(int streamFlag, Rule rule) {

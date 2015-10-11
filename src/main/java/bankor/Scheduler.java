@@ -19,10 +19,10 @@ public class Scheduler implements Runnable {
 
     class Capsule {
         MessageDirection type;
-        Address address;
+        long address;
         Message msg;
 
-        Capsule(MessageDirection type, Address address, Message msg) {
+        Capsule(MessageDirection type, long address, Message msg) {
             this.type = type;
             this.address = address;
             this.msg = msg;
@@ -60,7 +60,7 @@ public class Scheduler implements Runnable {
         }
     }
 
-    public boolean push(MessageDirection type, Address target, Message msg) {
+    public boolean push(MessageDirection type, long target, Message msg) {
 
         try {
 
@@ -77,7 +77,7 @@ public class Scheduler implements Runnable {
 
     public void end() {
 
-        push(MessageDirection.MESSAGE_END, null, null);
+        push(MessageDirection.MESSAGE_END, 0, null);
 
     }
 
