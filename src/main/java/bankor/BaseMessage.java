@@ -288,14 +288,12 @@ public abstract class BaseMessage implements MessageCallback {
 
     boolean readSignature(ReadableByteChannel in) {
 
-        ByteBuffer buf = ByteBuffer.allocate(2);
-
-        if (!readBlock(in, buf, 2)) {
+        if (!readBlock(in, tmpBuf, 2)) {
             System.out.println("Message.readSignature -> " + "Can not read correct signature from stream");
             return false;
         }
 
-        if (buf.getShort() != SIGNATURE) {
+        if (tmpBuf.getShort() != SIGNATURE) {
             System.out.println("Message.readSignature -> " + "Can not read correct signature from stream");
             return false;
         }
@@ -316,6 +314,9 @@ public abstract class BaseMessage implements MessageCallback {
         header.time = tmpBuf.getLong();
         header.deviceID = tmpBuf.getLong();
         header.messageID = tmpBuf.getLong();
+        for (int i = 0; i < MAX_VARIANT; i++) {
+            header.variant[i] = tmpBuf.getLong();
+        }
 
         return true;
     }
@@ -528,6 +529,9 @@ public abstract class BaseMessage implements MessageCallback {
         tmpBuf.putLong(header.time);
         tmpBuf.putLong(header.deviceID);
         tmpBuf.putLong(header.messageID);
+        for (int i = 0; i < MAX_VARIANT; i++) {
+            tmpBuf.putLong(header.variant[i]);
+        }
 
         if (!writeBlock(out, tmpBuf, MESSAGE_HEADER_SIZE)) {
             System.out.println("Message.writeHeader -> " + "Can not write header to stream");

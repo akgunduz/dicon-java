@@ -1,6 +1,12 @@
 package bankor;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
 
 /**
  * Created by akgunduz on 30/08/15.
@@ -8,7 +14,9 @@ import java.net.InetAddress;
 public class NetAddress {
 
     private static final long IPADDRESS_MASK = 0xFFFFFFFFL;
-    private static final long LOOPBACK_ADDRESS = 0x7F000001L;
+    private static final long LOOPBACK_ADDRESS = 0x0100007FL;
+    private static final int LOOPBACK_RANGE = 256;
+    public static final int DEFAULT_PORT = 61001;
 
     private NetAddress(){}
 
@@ -38,14 +46,14 @@ public class NetAddress {
         return newIP;
     }
 
-    public static long parseAddress(long ip, int port) {
+    public static long parseAddress(long ip, int port, int netmask) {
 
-        return ((long)port << 40) | ip;
+        return ((long)netmask << 48) | ((long)port << 32) | ip;
     }
 
     public static long getIP(long address) {
 
-        return address & 0xFFFFFFFFL;
+        return address & IPADDRESS_MASK;
     }
 
     public static long getIP(byte[] pieces) {
@@ -74,7 +82,12 @@ public class NetAddress {
 
     public static int getPort(long address) {
 
-        return (int)((address >> 40) & 0xFFFF);
+        return (int)((address >> 32) & 0xFFFF);
+    }
+
+    public static int getNetmask(long address) {
+
+        return (int)((address >> 48) & 0xFFFF);
     }
 
     public static InetAddress getInetAddress(long address) {
@@ -107,6 +120,52 @@ public class NetAddress {
         }
 
         return pieces;
+    }
+
+    public static List<Long> getAddressList(long address) {
+
+        List<Long> list = new ArrayList<>();
+
+        int netmask = getNetmask(address);
+
+        long ownIP = getIP(address);
+
+        if (NetAddress.isLoopback(address)) {
+
+            for (int i = 0; i < LOOPBACK_RANGE; i++) {
+
+                long destAddress = parseAddress(ownIP, DEFAULT_PORT + i, netmask);
+
+                if (destAddress != address) {
+
+                    list.add(destAddress);
+
+                }
+
+            }
+
+        } else {
+
+            long range = 1 << (32 - netmask);
+
+            long startIP = (1 >> netmask) & ownIP + 1;
+
+            for (int i = 0; i < range; i++) {
+
+                if (startIP != ownIP) {
+
+                    long destAddress = parseAddress(startIP, DEFAULT_PORT, netmask);
+
+                    list.add(destAddress);
+
+                }
+
+                startIP++;
+            }
+
+        }
+
+        return list;
     }
 }
 

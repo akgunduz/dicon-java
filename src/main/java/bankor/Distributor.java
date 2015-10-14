@@ -11,6 +11,8 @@ public class Distributor extends Component implements NodeCallback {
     int collectorIndex;
     int nodeIndex;
 
+    public static final String DISTRIBUTOR_PATH = "Distributor";
+
     ArrayDeque<Long> collectorWaitingList = new ArrayDeque<>();
 
     DiffTime collStartTime = new DiffTime();
@@ -20,10 +22,13 @@ public class Distributor extends Component implements NodeCallback {
     public Distributor(int collectorIndex, int nodeIndex, String rootPath, double backupRate) {
         super(collectorIndex, nodeIndex, rootPath);
 
-        this.collectorIndex = collectorIndex;
-        this.nodeIndex = nodeIndex;
+        this.collectorIndex = 0;
+        this.nodeIndex = 1;
 
         nodeManager = new NodeManager(this, backupRate);
+
+        App.getInstance().updateUI(0, Address.getString(connectors[collectorIndex].getAddress()),
+                Address.getString(connectors[nodeIndex].getAddress()));
     }
 
     @Override

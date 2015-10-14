@@ -79,13 +79,13 @@ public abstract class Interface implements SchedulerCallback, Runnable {
     @Override
     public boolean onProcess(final long address, final Message msg) {
 
-        class OneShotTask implements Runnable {
-            public void run() {
+     //   class OneShotTask implements Runnable {
+    //        public void run() {
                 onSend(address, msg);
-            }
-        }
+     //       }
+    //    }
 
-        new Thread(new OneShotTask()).start();
+    //    new Thread(new OneShotTask()).start();
         return true;
     }
 

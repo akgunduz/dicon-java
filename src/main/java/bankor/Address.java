@@ -1,9 +1,19 @@
 package bankor;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+
 /**
  * Created by akgunduz on 30/08/15.
  */
 public class Address {
+
+    private static List<ConnectInterface> interfaceList;
 
     private Address(){}
 
@@ -38,4 +48,5 @@ public class Address {
                 return getStdString(address);
         }
     }
+
 }

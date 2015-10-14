@@ -1,18 +1,12 @@
 package bankor;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Pipe;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by akgunduz on 30/08/15.
@@ -21,14 +15,11 @@ public class Net extends Interface {
 
     private static final String LOGTAG = "Net";
 
-    public static final int DEFAULT_PORT = 61001;
-
     private static int portOffset = 0;
 
     private ServerSocketChannel server;
 
-    private long selectedIP;
-
+    private static List<ConnectInterface> interfaceList = null;
 
     public Net(int index, final InterfaceCallback cb, String rootPath) {
 
@@ -41,36 +32,9 @@ public class Net extends Interface {
     @Override
     boolean init(int index) {
 
-        int trycount = 0;
+        int tryCount = 0;
 
         try {
-
-            Enumeration<NetworkInterface> netInterfaces = NetworkInterface.getNetworkInterfaces();
-
-            NetworkInterface networkInterface;
-            do {
-                networkInterface = netInterfaces.nextElement();
-                if (index == 0) { //loopback
-                    if (networkInterface.isLoopback()) {
-                        break;
-                    }
-                } else {
-                    String name = networkInterface.getName();
-                    if (name.equals("en0") || name.equals("eth3")) {
-                        break;
-                    }
-                }
-
-            } while(netInterfaces.hasMoreElements());
-
-            Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-            while (addresses.hasMoreElements()) {
-                InetAddress inetAddress=addresses.nextElement();
-                if (inetAddress != null && inetAddress instanceof Inet4Address) {
-                    selectedIP = NetAddress.getIP(inetAddress.getAddress());
-                    break;
-                }
-            }
 
             server = ServerSocketChannel.open();
             server.configureBlocking(false);
@@ -84,7 +48,7 @@ public class Net extends Interface {
 
             boolean status = false;
 
-            trycount++;
+            tryCount++;
 
             setAddress(index);
 
@@ -100,7 +64,7 @@ public class Net extends Interface {
 
             } catch (Exception e) {
                 System.out.println("Net.init -> " + e.getMessage());
-                if (trycount == 10) {
+                if (tryCount == 10) {
                     return false;
                 }
 
@@ -122,15 +86,14 @@ public class Net extends Interface {
         return Interfaces.INTERFACE_NET;
     }
 
-    @Override
-    List<Long> getAddressList() {
-        return null;
-    }
+
 
     @Override
     void setAddress(int index) {
 
-        address = NetAddress.parseAddress(selectedIP, DEFAULT_PORT + portOffset++);
+        address = NetAddress.parseAddress(ConnectInterface.getAddress(index),
+                NetAddress.DEFAULT_PORT + portOffset++,
+                (int)ConnectInterface.getHelper(index));
 
     }
 
@@ -215,7 +178,7 @@ public class Net extends Interface {
             msg.writeToStream(socket);
 
         } catch (Exception e) {
-            System.out.println("Net.runSender -> " + e.getMessage());
+            //System.out.println("Net.runSender -> " + e.getMessage());
 
         } finally {
 
@@ -231,8 +194,51 @@ public class Net extends Interface {
         }
     }
 
-    public static int getInterfaceAddress() {
-        return 1;
+    public static List<ConnectInterface> getInterfaces() {
+
+        if (interfaceList != null) {
+            return interfaceList;
+        }
+
+        interfaceList = new ArrayList<>();
+
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+
+            for (NetworkInterface netInterface : Collections.list(interfaces)) {
+                String name = netInterface.getName();
+                if (name.startsWith("et") ||
+                        name.startsWith("en") ||
+                        name.startsWith("br") ||
+                        name.startsWith("lo")) {
+
+
+                    List<InterfaceAddress> addresses = netInterface.getInterfaceAddresses();
+
+                    for (InterfaceAddress address : addresses) {
+                        InetAddress inetAddress = address.getAddress();
+                        if (inetAddress != null && inetAddress instanceof Inet4Address) {
+                            interfaceList.add(new ConnectInterface(name,
+                                    NetAddress.getIP(inetAddress.getAddress()), address.getNetworkPrefixLength()));
+                            break;
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("NetAddress.getInetAddress-> " + e.getMessage());
+            return null;
+        }
+
+        return interfaceList;
+
+    }
+
+    @Override
+    List<Long> getAddressList() {
+
+        return NetAddress.getAddressList(address);
     }
 }
 

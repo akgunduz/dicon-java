@@ -17,8 +17,8 @@ public class Collector extends Component {
     public Collector(int distributorIndex, int nodeIndex, String rootPath) {
         super(distributorIndex, nodeIndex, rootPath);
 
-        this.distributorIndex = distributorIndex;
-        this.nodeIndex = nodeIndex;
+        this.distributorIndex = 0;
+        this.nodeIndex = 1;
     }
 
     @Override

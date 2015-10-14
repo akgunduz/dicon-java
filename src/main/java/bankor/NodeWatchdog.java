@@ -23,7 +23,7 @@ public class NodeWatchdog {
                 nodeCallback.onWakeup();
             }
 
-        }, 0, WAKEUP_TIMEOUT);
+        }, NODE_TIMEOUT, WAKEUP_TIMEOUT);
 
     }
 

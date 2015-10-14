@@ -17,8 +17,8 @@ public class Node extends Component {
     public Node(int distributorIndex, int collectorIndex, String rootPath) {
         super(distributorIndex, collectorIndex, rootPath);
 
-        this.distributorIndex = distributorIndex;
-        this.collectorIndex = collectorIndex;
+        this.distributorIndex = 0;
+        this.collectorIndex = 1;
     }
 
     @Override

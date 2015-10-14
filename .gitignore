@@ -1,5 +1,6 @@
 /Bankor.xcodeproj/
 /.idea/
+/.gradle/
 Bankor.asta.lock
 /Bankor/build/
 /Bankor/dist/

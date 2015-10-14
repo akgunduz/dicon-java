@@ -5,7 +5,7 @@ package bankor;
  */
 public abstract class Component implements SchedulerCallback {
 
-    protected Connector[] connectors;
+    protected Connector[] connectors = new Connector[2];
     private String rootPath;
 
     public Component(int interfaceIndexFirst, int interfaceIndexSecond, String rootPath) {
