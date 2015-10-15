@@ -4,42 +4,43 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<TabPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
     <tabs>
         <Tab text="Distributor">
             <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="567.0" prefWidth="618.0">
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="700.0" prefWidth="614.0">
                     <children>
-                        <ChoiceBox fx:id="distCollInterface" layoutX="152.0" layoutY="27.0" prefHeight="26.0" prefWidth="150.0" />
-                        <ChoiceBox fx:id="distNodeInterface" layoutX="441.0" layoutY="27.0" prefWidth="150.0" />
-                        <TableView fx:id="distCollList" layoutX="23.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
+                        <ChoiceBox fx:id="distCollInterface" layoutX="144.0" layoutY="27.0" prefHeight="26.0" prefWidth="150.0" />
+                        <ChoiceBox fx:id="distNodeInterface" layoutX="433.0" layoutY="26.0" prefWidth="150.0" />
+                        <TableView fx:id="distCollList" layoutX="14.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
                             <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
                             <columns>
                                 <TableColumn fx:id="distCollAddressCol" editable="false" prefWidth="75.0" sortable="false" text="Address" />
                                 <TableColumn fx:id="distCollNodeCol" editable="false" prefWidth="75.0" sortable="false" text="Attached Node" />
                             </columns>
                         </TableView>
-                        <Label layoutX="22.0" layoutY="32.0" text="Collector Interface :" />
-                        <Label layoutX="329.0" layoutY="32.0" text="Node Interface :" />
-                        <Label layoutX="22.0" layoutY="74.0" text="Collector Address :" />
-                        <Label layoutX="329.0" layoutY="74.0" text="Node Address :" />
-                        <Label fx:id="distCollInterfaceAddress" layoutX="152.0" layoutY="74.0" text="CADDRESS" />
-                        <Label fx:id="distNodeInterfaceAddress" layoutX="441.0" layoutY="74.0" text="NADDRESS" />
-                        <Label layoutX="22.0" layoutY="107.0" text="Backup Rate :" />
-                        <TextField layoutX="152.0" layoutY="102.0" prefHeight="26.0" prefWidth="150.0" promptText="0" />
-                        <Label layoutX="329.0" layoutY="107.0" text="Backup Status :" />
-                        <Label layoutX="441.0" layoutY="107.0" text="BACKUPS" />
-                        <Button fx:id="distInitBtn" layoutX="23.0" layoutY="153.0" mnemonicParsing="false" onAction="#onDistInitClick" prefHeight="50.0" prefWidth="280.0" text="Init" />
-                        <Button fx:id="distPollBtn" layoutX="312.0" layoutY="153.0" mnemonicParsing="false" onAction="#onDistPollClick"  prefHeight="50.0" prefWidth="280.0" text="Poll" />
-                        <TableView layoutX="311.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
+                        <Label layoutX="14.0" layoutY="32.0" text="Collector Interface :" />
+                        <Label layoutX="321.0" layoutY="31.0" text="Node Interface :" />
+                        <Label layoutX="14.0" layoutY="74.0" text="Collector Address :" />
+                        <Label layoutX="321.0" layoutY="73.0" text="Node Address :" />
+                        <Label fx:id="distCollInterfaceAddress" layoutX="144.0" layoutY="74.0" text="" />
+                        <Label fx:id="distNodeInterfaceAddress" layoutX="433.0" layoutY="73.0" text="" />
+                        <Label layoutX="14.0" layoutY="107.0" text="Backup Rate :" />
+                        <TextField layoutX="144.0" layoutY="102.0" prefHeight="26.0" prefWidth="150.0" promptText="0" />
+                        <Label layoutX="321.0" layoutY="106.0" text="Backup Status :" />
+                        <Label layoutX="433.0" layoutY="106.0" text="BACKUPS" />
+                        <Button fx:id="distInitBtn" layoutX="14.0" layoutY="153.0" mnemonicParsing="false" onAction="#onDistInitClick" prefHeight="50.0" prefWidth="280.0" text="Init" />
+                        <Button fx:id="distPollBtn" layoutX="306.0" layoutY="153.0" mnemonicParsing="false" onAction="#onDistPollClick" prefHeight="50.0" prefWidth="280.0" text="Poll" />
+                        <TableView fx:id="distNodeList" layoutX="306.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
                             <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
                             <columns>
-                                <TableColumn prefWidth="75.0" text="Address" />
-                                <TableColumn prefWidth="75.0" text="State" />
+                                <TableColumn fx:id="distNodeAddressCol" editable="false" prefWidth="75.0" text="Address" />
+                                <TableColumn fx:id="distNodeStateCol" editable="false" prefWidth="75.0" text="State" />
                             </columns>
                         </TableView>
                         <Label layoutX="133.0" layoutY="218.0" text="Collectors" />
                         <Label layoutX="432.0" layoutY="218.0" text="Nodes" />
+                  <ListView fx:id="distLog" layoutX="14.0" layoutY="453.0" prefHeight="200.0" prefWidth="572.0" />
                     </children></AnchorPane>
             </content>
         </Tab>

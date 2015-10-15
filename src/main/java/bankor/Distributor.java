@@ -21,7 +21,7 @@ public class Distributor extends Component implements NodeCallback {
 
         nodeManager = new NodeManager(this, backupRate);
 
-        App.getInstance().updateUI(0, Address.getString(connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress()),
+        UI.DIST_ADDRESS.update(Address.getString(connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress()),
                 Address.getString(connectors[HostTypes.HOST_NODE.getId()].getAddress()));
     }
 
@@ -38,23 +38,22 @@ public class Distributor extends Component implements NodeCallback {
         switch(msg.getType()) {
 
             case MSGTYPE_READY:
-                //LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
-                //LOG_U(UI_UPDATE_DIST_LOG,
-               //         "\"READY\" msg from collector: %s", Address::getString(address).c_str());
+
+                UI.DIST_COLL_LIST.update(address, 0L);
+                UI.DIST_LOG.update("\"READY\" msg from collector: " + Address.getString(address));
                 break;
 
             case MSGTYPE_NODE:
-              //  LOG_U(UI_UPDATE_DIST_LOG,
-             //           "\"CLIENT\" msg from collector: %s", Address::getString(address).c_str());
 
+                UI.DIST_LOG.update("\"NODE\" msg from collector: " + Address.getString(address));
                 status = send2CollectorMsg(address, MessageTypes.MSGTYPE_NODE);
                 break;
 
             case MSGTYPE_TIME:
+
                 collStartTime.start();
                 nodeManager.resetTimes();
-            //    LOG_U(UI_UPDATE_DIST_LOG,
-            //            "\"TIME\" msg from collector: %s", Address::getString(address).c_str());
+                UI.DIST_LOG.update("\"TIME\" msg from collector: " + Address.getString(address));
                 break;
 
             default:
@@ -73,20 +72,17 @@ public class Distributor extends Component implements NodeCallback {
         switch(msg.getType()) {
 
             case MSGTYPE_READY:
-            //    LOG_U(UI_UPDATE_DIST_LOG,
-            //            "\"READY\" msg from client: %s", Address::getString(address).c_str());
 
-           //     LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
+                UI.DIST_NODE_LIST.update(address, NodeStates.IDLE);
+                UI.DIST_LOG.update("\"READY\" msg from node: " + Address.getString(address));
 
                 nodeManager.setIdle(address, collStartTime.stop());
 
                 if (collectorWaitingList.size() > 0) {
 
                     long collectorAddress = collectorWaitingList.poll();
-
-         //           LOG_U(UI_UPDATE_DIST_LOG,
-         //                   "Processing a collector from the waiting list: %s",
-        //                    Address::getString(collectorAddress).c_str());
+                    UI.DIST_LOG.update("Processing a collector from the waiting list: " +
+                            Address.getString(collectorAddress));
 
                     status = send2CollectorMsg(collectorAddress, MessageTypes.MSGTYPE_NODE);
 
@@ -97,16 +93,15 @@ public class Distributor extends Component implements NodeCallback {
                 break;
 
             case MSGTYPE_ALIVE:
-           //     LOG_U(UI_UPDATE_DIST_LOG,
-             //           "\"ALIVE\" msg from client: %s", Address::getString(address).c_str());
+
+                UI.DIST_LOG.update("\"ALIVE\" msg from node: " + Address.getString(address));
 
                 if (!nodeManager.validate(address)
                         && collectorWaitingList.size() > 0) {
 
                     long collectorAddress = collectorWaitingList.poll();
-
-          //          LOG_U(UI_UPDATE_DIST_LOG,
-          //                  "Processing a collector from the waiting list: %s", Address::getString(collectorAddress).c_str());
+                    UI.DIST_LOG.update("Processing a collector from the waiting list: " +
+                            Address.getString(collectorAddress));
 
                     status = send2CollectorMsg(collectorAddress, MessageTypes.MSGTYPE_NODE);
 
@@ -114,27 +109,26 @@ public class Distributor extends Component implements NodeCallback {
                     status = true;
                 }
 
-         //       LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, IDLE);
+                UI.DIST_NODE_LIST.update(address, NodeStates.IDLE);
 
                 break;
 
             case MSGTYPE_BUSY:
-         //       LOG_U(UI_UPDATE_DIST_LOG,
-         //               "\"BUSY\" msg from client: %s", Address::getString(address).c_str());
+
+                UI.DIST_LOG.update("\"BUSY\" msg from node: " + Address.getString(address));
 
                 nodeManager.setBusy(address);
-                //          LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, BUSY);
-
+                UI.DIST_NODE_LIST.update(address, NodeStates.BUSY);
 
                 status = true;
                 break;
 
             case MSGTYPE_TIMEOUT:
-       //         LOG_U(UI_UPDATE_DIST_LOG,
-       //                 "\"TIMEOUT\" msg from client: %s", Address::getString(address).c_str());
+
+                UI.DIST_LOG.update("\"TIMEOUT\" msg from node: " + Address.getString(address));
 
                 nodeManager.remove(address);
-                //         LOG_U(UI_UPDATE_DIST_CLIENT_LIST, address, REMOVE);
+                UI.DIST_NODE_LIST.update(address, NodeStates.REMOVE);
 
                 status = send2CollectorMsg(msg.getVariant(0), MessageTypes.MSGTYPE_NODE);
 
@@ -156,8 +150,7 @@ public class Distributor extends Component implements NodeCallback {
 
             case MSGTYPE_WAKEUP:
 
-          //      LOG_U(UI_UPDATE_DIST_LOG,
-         //               "\"WAKEUP\" msg sent to client: %s", Address::getString(address).c_str());
+                UI.DIST_LOG.update("\"WAKEUP\" msg sent to node: " + Address.getString(address));
                 break;
 
             default:
@@ -177,8 +170,7 @@ public class Distributor extends Component implements NodeCallback {
 
             case MSGTYPE_WAKEUP:
 
-             //   LOG_U(UI_UPDATE_DIST_LOG,
-            //            "\"WAKEUP\" msg sent to collector: %s", Address::getString(address).c_str());
+                UI.DIST_LOG.update("\"WAKEUP\" msg sent to collector: " + Address.getString(address));
                 break;
 
             case MSGTYPE_NODE:
@@ -187,27 +179,22 @@ public class Distributor extends Component implements NodeCallback {
 
                 if (nodeAddress != 0) {
 
-               //     LOG_U(UI_UPDATE_DIST_CLIENT_LIST, clientAddress, PREBUSY);
-               //     LOG_U(UI_UPDATE_DIST_LOG,
-              //              "\"CLIENT\" msg sent to collector: %s with available client: %s",
-              //              Address::getString(address).c_str(),
-              //              Address::getString(clientAddress).c_str());
+                    UI.DIST_NODE_LIST.update(nodeAddress, NodeStates.PREBUSY);
+                    UI.DIST_COLL_LIST.update(address, nodeAddress);
+                    UI.DIST_LOG.update("\"NODE\" msg sent to collector: " + Address.getString(address) +
+                        " with available node: " + Address.getString(nodeAddress));
 
                     msg.setVariant(0, nodeAddress);
-
-                    //   LOG_U(UI_UPDATE_DIST_COLL_LIST, address, clientAddress);
 
                 } else {
 
                     collectorWaitingList.offer(address);
 
-            //        LOG_U(UI_UPDATE_DIST_LOG,
-             //               "\"CLIENT\" msg sent to collector: %s with no available client",
-             //               Address::getString(address).c_str());
+                    UI.DIST_COLL_LIST.update(address, 0L);
+                    UI.DIST_LOG.update("\"NODE\" msg sent to collector: " + Address.getString(address) +
+                            " with no available node");
 
                     msg.setVariant(0, 0);
-
-            //        LOG_U(UI_UPDATE_DIST_COLL_LIST, address, (uint64_t)0L);
                 }
 
                 break;
@@ -224,15 +211,14 @@ public class Distributor extends Component implements NodeCallback {
 
         List<Long> list = connectors[index].getAddressList();
 
-        for (int i = 0; i < 5; /*list.size();*/ i++) {
+        for (int i = 0; i < list.size(); i++) {
 
             Message msg = new Message(HostTypes.HOST_DISTRIBUTOR, MessageTypes.MSGTYPE_WAKEUP, getRootPath());
             connectors[index].send(list.get(i), msg);
 
         }
 
-        //      LOG_U(UI_UPDATE_DIST_LOG,
-        //              "\"WAKEUP\" messages sent to network");
+        UI.DIST_LOG.update("\"WAKEUP\" messages sent to network");
 
         return true;
     }

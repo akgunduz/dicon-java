@@ -182,7 +182,7 @@ public class Net extends Interface {
             msg.writeToStream(socket);
 
         } catch (Exception e) {
-            System.out.println("Net.runSender -> " + e.getMessage());
+        //    System.out.println("Net.runSender -> " + e.getMessage());
 
         } finally {
 
