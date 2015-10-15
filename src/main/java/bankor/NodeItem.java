@@ -11,7 +11,7 @@ public class NodeItem {
     public int usage;
     public long address;
     public long lastServedCollector;
-    public DiffTime diffTime;
+    public DiffTime diffTime = new DiffTime();
     public NodeWatchdog watchdog = null;
 
     public NodeItem(NodeStates state, int usage, long address) {

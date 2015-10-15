@@ -54,9 +54,10 @@ public class Scheduler implements Runnable {
                 }
 
             } catch (Exception e) {
-                System.out.println("Scheduler.run -> " + e.getMessage());
+                System.out.println("Scheduler.run -> " + e.getCause().getMessage());
                 return;
             }
+
         }
     }
 
@@ -68,7 +69,7 @@ public class Scheduler implements Runnable {
             messages.put(capsule);
 
         } catch (Exception e) {
-            System.out.println("Scheduler.run -> " + e.getMessage());
+            System.out.println("Scheduler.push -> " + e.getMessage());
             return false;
         }
 

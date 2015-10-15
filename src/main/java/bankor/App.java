@@ -146,8 +146,10 @@ public class App extends Application {
 
     public void onDistPollClick(Event event) {
 
-        distObject.reset();
-        distObject.sendWakeupMessagesAll();
+        if (distObject != null) {
+            distObject.reset();
+            distObject.sendWakeupMessagesAll();
+        }
     }
 
     public LogCallback distUpdateAddresses = new LogCallback() {
