@@ -8,9 +8,6 @@ import java.util.List;
  */
 public class Distributor extends Component implements NodeCallback {
 
-    int collectorIndex;
-    int nodeIndex;
-
     public static final String DISTRIBUTOR_PATH = "Distributor";
 
     ArrayDeque<Long> collectorWaitingList = new ArrayDeque<>();
@@ -20,44 +17,21 @@ public class Distributor extends Component implements NodeCallback {
     NodeManager nodeManager;
 
     public Distributor(int collectorIndex, int nodeIndex, String rootPath, double backupRate) {
-        super(collectorIndex, nodeIndex, rootPath);
-
-        this.collectorIndex = 0;
-        this.nodeIndex = 1;
+        super(generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath);
 
         nodeManager = new NodeManager(this, backupRate);
 
-        App.getInstance().updateUI(0, Address.getString(connectors[collectorIndex].getAddress()),
-                Address.getString(connectors[nodeIndex].getAddress()));
+        App.getInstance().updateUI(0, Address.getString(connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress()),
+                Address.getString(connectors[HostTypes.HOST_NODE.getId()].getAddress()));
     }
 
     @Override
-    public boolean onProcess(long address, Message msg) {
-
-        switch (msg.getOwner()) {
-
-            case HOST_COLLECTOR:
-                if (connectors[collectorIndex].getInterfaceType() == Address.getInterface(address)) {
-                    processCollectorMsg(address, msg);
-                }
-                break;
-
-            case HOST_NODE:
-                if (connectors[nodeIndex].getInterfaceType() == Address.getInterface(address)) {
-                    processNodeMsg(address, msg);
-                }
-                break;
-
-            default:
-                System.out.println("Wrong message : " + msg.getType().getName() + "received from " + Address.getString(address));
-                break;
-
-        }
-
-        return true;
+    public boolean processDistributorMsg(long address, Message msg) {
+        return false;
     }
 
-    boolean processCollectorMsg(long address, Message msg) {
+    @Override
+    public boolean processCollectorMsg(long address, Message msg) {
 
         boolean status = false;
 
@@ -91,7 +65,8 @@ public class Distributor extends Component implements NodeCallback {
 
     }
 
-    boolean processNodeMsg(long address, Message msg) {
+    @Override
+    public boolean processNodeMsg(long address, Message msg) {
 
         boolean status = false;
 
@@ -190,7 +165,7 @@ public class Distributor extends Component implements NodeCallback {
 
         }
 
-        return connectors[nodeIndex].send(address, msg);
+        return connectors[HostTypes.HOST_NODE.getId()].send(address, msg);
 
     }
 
@@ -241,7 +216,7 @@ public class Distributor extends Component implements NodeCallback {
                 return false;
         }
 
-        return connectors[collectorIndex].send(address, msg);
+        return connectors[HostTypes.HOST_COLLECTOR.getId()].send(address, msg);
 
     }
 
@@ -249,7 +224,7 @@ public class Distributor extends Component implements NodeCallback {
 
         List<Long> list = connectors[index].getAddressList();
 
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < 5; /*list.size();*/ i++) {
 
             Message msg = new Message(HostTypes.HOST_DISTRIBUTOR, MessageTypes.MSGTYPE_WAKEUP, getRootPath());
             connectors[index].send(list.get(i), msg);
@@ -264,9 +239,9 @@ public class Distributor extends Component implements NodeCallback {
 
     boolean sendWakeupMessagesAll() {
 
-        sendWakeupMessage(collectorIndex);
-        if (collectorIndex != nodeIndex) {
-            sendWakeupMessage(nodeIndex);
+        sendWakeupMessage(HostTypes.HOST_COLLECTOR.getId());
+        if (connectors[HostTypes.HOST_COLLECTOR.getId()] != connectors[HostTypes.HOST_NODE.getId()]) {
+            sendWakeupMessage(HostTypes.HOST_NODE.getId());
         }
         return true;
     }
@@ -285,7 +260,7 @@ public class Distributor extends Component implements NodeCallback {
 
         Message msg = new Message(HostTypes.HOST_NODE, MessageTypes.MSGTYPE_TIMEOUT, getRootPath());
         msg.setVariant(0, node.lastServedCollector);
-        connectors[nodeIndex].put(node.address, msg);
+        connectors[HostTypes.HOST_NODE.getId()].put(node.address, msg);
 
         return true;
     }
@@ -293,7 +268,7 @@ public class Distributor extends Component implements NodeCallback {
     @Override
     public boolean onWakeup() {
 
-        return sendWakeupMessage(nodeIndex);
+        return sendWakeupMessage(HostTypes.HOST_NODE.getId());
 
     }
 }

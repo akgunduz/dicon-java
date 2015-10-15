@@ -61,7 +61,7 @@ public abstract class Interface implements SchedulerCallback, Runnable {
         initialized = true;
     }
 
-    void end() {
+    public void end() {
 
         ByteBuffer buffer = ByteBuffer.allocate(1);
         buffer.put(SHUTDOWN_NOTIFIER);

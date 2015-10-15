@@ -7,47 +7,16 @@ import java.io.File;
  */
 public class Node extends Component {
 
-    int distributorIndex;
-    int collectorIndex;
-
     long distributorAddress = 0;
 
     Rule rule;
 
     public Node(int distributorIndex, int collectorIndex, String rootPath) {
-        super(distributorIndex, collectorIndex, rootPath);
-
-        this.distributorIndex = 0;
-        this.collectorIndex = 1;
+        super(generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath);
     }
 
     @Override
-    public boolean onProcess(long address, Message msg) {
-
-        switch (msg.getOwner()) {
-
-            case HOST_DISTRIBUTOR:
-                if (connectors[distributorIndex].getInterfaceType() == Address.getInterface(address)) {
-                    processDistributorMsg(address, msg);
-                }
-                break;
-
-            case HOST_COLLECTOR:
-                if (connectors[collectorIndex].getInterfaceType() == Address.getInterface(address)) {
-                    processCollectorMsg(address, msg);
-                }
-                break;
-
-            default:
-                System.out.println("Wrong message : " + msg.getType().getName() + "received from " + Address.getString(address));
-                break;
-
-        }
-
-        return true;
-    }
-
-    boolean processDistributorMsg(long address, Message msg) {
+    public boolean processDistributorMsg(long address, Message msg) {
 
         boolean status = false;
 
@@ -71,7 +40,8 @@ public class Node extends Component {
 
     }
 
-    boolean processCollectorMsg(long address, Message msg) {
+    @Override
+    public boolean processCollectorMsg(long address, Message msg) {
 
         boolean status = false;
 
@@ -126,6 +96,11 @@ public class Node extends Component {
 
     }
 
+    @Override
+    public boolean processNodeMsg(long address, Message msg) {
+        return false;
+    }
+
     boolean send2DistributorMsg(long address, MessageTypes type) {
 
         Message msg = new Message(HostTypes.HOST_COLLECTOR, type, getRootPath());
@@ -157,7 +132,7 @@ public class Node extends Component {
                 return false;
         }
 
-        return connectors[distributorIndex].send(address, msg);
+        return connectors[HostTypes.HOST_DISTRIBUTOR.getId()].send(address, msg);
 
     }
 
@@ -179,7 +154,7 @@ public class Node extends Component {
                 return false;
         }
 
-        return connectors[collectorIndex].send(address, msg);
+        return connectors[HostTypes.HOST_COLLECTOR.getId()].send(address, msg);
 
     }
 

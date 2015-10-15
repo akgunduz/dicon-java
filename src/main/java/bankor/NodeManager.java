@@ -22,7 +22,7 @@ public class NodeManager {
         this.nodeCallback = nodeCallback;
         this.backupRate = backupRate;
         if (nodeWatchdog == null) {
-            nodeWatchdog = new NodeWatchdog(nodeCallback);
+            //nodeWatchdog = new NodeWatchdog(nodeCallback);
         }
     }
 

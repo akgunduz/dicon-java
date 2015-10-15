@@ -30,4 +30,8 @@ public enum HostTypes {
     public static String getName(int id) {
         return getHost(id).name;
     }
+
+    public static int getMax() {
+        return values().length;
+    }
 }

@@ -38,6 +38,7 @@ public class Net extends Interface {
 
             server = ServerSocketChannel.open();
             server.configureBlocking(false);
+            server.socket().setReuseAddress(true);
 
         } catch (Exception e) {
             System.out.println("Net.init -> " + e.getMessage());
@@ -54,7 +55,7 @@ public class Net extends Interface {
 
             try {
 
-                server.socket().bind(new InetSocketAddress(NetAddress.getPort(address)));
+                server.socket().bind(new InetSocketAddress(NetAddress.getInetAddress(address), NetAddress.getPort(address)));
                 System.out.println("Socket opened at ip :" + NetAddress.getIPstr(address) +
                         " port : " + NetAddress.getPort(address));
 
@@ -170,15 +171,18 @@ public class Net extends Interface {
 
         try {
 
-            InetAddress serverAddr = NetAddress.getInetAddress(target);
             socket = SocketChannel.open();
-            socket.connect(new InetSocketAddress(serverAddr, NetAddress.getPort(target)));
+
+            InetSocketAddress targetSocket = new InetSocketAddress(NetAddress.getInetAddress(target),
+                    NetAddress.getPort(target));
+
+            socket.connect(targetSocket);
 
             msg.setOwnerAddress(getAddress());
             msg.writeToStream(socket);
 
         } catch (Exception e) {
-            //System.out.println("Net.runSender -> " + e.getMessage());
+            System.out.println("Net.runSender -> " + e.getMessage());
 
         } finally {
 
@@ -232,6 +236,19 @@ public class Net extends Interface {
         }
 
         return interfaceList;
+
+    }
+
+    public void end() {
+
+        super.end();
+        try {
+
+            server.socket().close();
+
+        } catch (Exception e) {
+            System.out.println("Net.end -> " + e.getMessage());
+        }
 
     }
 

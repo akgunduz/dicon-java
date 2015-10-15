@@ -11,10 +11,6 @@ import java.util.*;
  * Created by akgunduz on 03/10/15.
  */
 
-interface RuleParser {
-    boolean parse(Object object);
-}
-
 public class Rule {
 
     public static final String RULE_FILE = "Rule.json";
@@ -26,7 +22,7 @@ public class Rule {
 
     private List<Content>[] contentList = (ArrayList<Content>[])new ArrayList[RuleTypes.getSize()];
 
-    private Map<String, RuleParser> ruleMap = new HashMap<>(RuleTypes.getSize());
+    private Map<String, RuleCallback> ruleMap = new HashMap<>(RuleTypes.getSize());
 
     public Rule(String rootPath, String path) {
 
@@ -95,7 +91,7 @@ public class Rule {
         return buffer;
     }
 
-    final RuleParser parseRunTypeNode = new RuleParser() {
+    final RuleCallback parseRunTypeNode = new RuleCallback() {
         @Override
         public boolean parse(Object object) {
 
@@ -114,7 +110,7 @@ public class Rule {
         }
     };
 
-    final RuleParser parseFilesNode = new RuleParser() {
+    final RuleCallback parseFilesNode = new RuleCallback() {
         @Override
         public boolean parse(Object object) {
 
@@ -147,7 +143,7 @@ public class Rule {
         }
     };
 
-    final RuleParser parseParametersNode = new RuleParser() {
+    final RuleCallback parseParametersNode = new RuleCallback() {
         @Override
         public boolean parse(Object object) {
 
@@ -177,7 +173,7 @@ public class Rule {
         }
     };
 
-    final RuleParser parseExecutorsNode = new RuleParser() {
+    final RuleCallback parseExecutorsNode = new RuleCallback() {
         @Override
         public boolean parse(Object object) {
 
@@ -219,7 +215,7 @@ public class Rule {
 
         for (String child : rule.keySet()) {
 
-            RuleParser ruleParser = ruleMap.get(child);
+            RuleCallback ruleParser = ruleMap.get(child);
             if (ruleParser == null) {
                 continue;
             }

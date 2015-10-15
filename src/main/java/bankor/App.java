@@ -90,8 +90,16 @@ public class App extends Application {
             distObject = new Distributor(distCollInterface.getSelectionModel().getSelectedIndex(),
                     distNodeInterface.getSelectionModel().getSelectedIndex(), path, 0);
 
+            distInitBtn.setText("Stop");
+
         } else {
 
+            distObject.end();
+            distObject = null;
+
+            distInitBtn.setText("Init");
+            distCollInterfaceAddress.setText("");
+            distNodeInterfaceAddress.setText("");
 
         }
     }
@@ -127,4 +135,10 @@ public class App extends Application {
     public final LogCallback updaters[] = {
             distUpdateAddresses
     };
+
+    @Override
+    public void stop(){
+        System.out.println("Stage is closing");
+        // Save file
+    }
 }

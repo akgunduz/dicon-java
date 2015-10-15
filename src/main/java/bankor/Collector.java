@@ -7,47 +7,17 @@ import java.util.*;
  */
 public class Collector extends Component {
 
-    int distributorIndex;
-    int nodeIndex;
-
     long distributorAddress = 0;
 
     Map<Long, Rule> rules = new HashMap<>();
 
     public Collector(int distributorIndex, int nodeIndex, String rootPath) {
-        super(distributorIndex, nodeIndex, rootPath);
+        super(generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath);
 
-        this.distributorIndex = 0;
-        this.nodeIndex = 1;
     }
 
     @Override
-    public boolean onProcess(long address, Message msg) {
-
-        switch (msg.getOwner()) {
-
-            case HOST_DISTRIBUTOR:
-                if (connectors[distributorIndex].getInterfaceType() == Address.getInterface(address)) {
-                    processDistributorMsg(address, msg);
-                }
-                break;
-
-            case HOST_NODE:
-                if (connectors[nodeIndex].getInterfaceType() == Address.getInterface(address)) {
-                    processNodeMsg(address, msg);
-                }
-                break;
-
-            default:
-                System.out.println("Wrong message : " + msg.getType().getName() + "received from " + Address.getString(address));
-                break;
-
-        }
-
-        return true;
-    }
-
-    boolean processDistributorMsg(long address, Message msg) {
+    public boolean processDistributorMsg(long address, Message msg) {
 
         boolean status = false;
 
@@ -107,7 +77,13 @@ public class Collector extends Component {
 
     }
 
-    boolean processNodeMsg(long address, Message msg) {
+    @Override
+    public boolean processCollectorMsg(long address, Message msg) {
+        return false;
+    }
+
+    @Override
+    public boolean processNodeMsg(long address, Message msg) {
 
         boolean status = false;
 
@@ -184,7 +160,7 @@ public class Collector extends Component {
 
         }
 
-        return connectors[nodeIndex].send(address, msg);
+        return connectors[HostTypes.HOST_NODE.getId()].send(address, msg);
 
     }
 
@@ -219,15 +195,11 @@ public class Collector extends Component {
                 return false;
         }
 
-        return connectors[distributorIndex].send(address, msg);
+        return connectors[HostTypes.HOST_DISTRIBUTOR.getId()].send(address, msg);
 
     }
 
     boolean processRule(String path) {
-
-        if (!path.equals(getRootPath())) {
-            setRootPath(path);
-        }
 
         return send2DistributorMsg(distributorAddress, MessageTypes.MSGTYPE_NODE);
     }
