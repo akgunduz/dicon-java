@@ -3,6 +3,7 @@ package bankor;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,7 +23,7 @@ public class Message extends BaseMessage {
 
     private Rule rule;
     private String rootPath;
-    public List<ByteBuffer> md5List;
+    public List<ByteBuffer> md5List = new ArrayList<>();
 
     public Message(String rootPath) {
 

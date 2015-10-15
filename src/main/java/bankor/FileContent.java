@@ -33,6 +33,7 @@ public class FileContent extends Content {
         String absPath = rootPath + path;
 
         setValid(true);
+        flaggedToSent = true;
 
         if (sMD5 != null && !sMD5.isEmpty()) {
             md5.put(Util.strToHex(sMD5));

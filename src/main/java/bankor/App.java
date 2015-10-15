@@ -20,13 +20,17 @@ import java.util.Map;
 public class App extends Application {
 
     @FXML
-    private ChoiceBox distCollInterface;
+    private ChoiceBox<String> distCollInterface;
     @FXML
-    private ChoiceBox distNodeInterface;
+    private ChoiceBox<String> distNodeInterface;
     @FXML
     private Label distCollInterfaceAddress;
     @FXML
     private Label distNodeInterfaceAddress;
+    @FXML
+    private TextField distBackupRate;
+    @FXML
+    private Label distBackupStatus;
     @FXML
     private Button distInitBtn;
     @FXML
@@ -47,6 +51,66 @@ public class App extends Application {
     private ListView<String> distLog;
 
     private Distributor distObject;
+
+
+    @FXML
+    private ChoiceBox<String> collDistInterface;
+    @FXML
+    private ChoiceBox<String> collNodeInterface;
+    @FXML
+    private Label collDistInterfaceAddress;
+    @FXML
+    private Label collNodeInterfaceAddress;
+    @FXML
+    private Label collDistAddress;
+    @FXML
+    private Label collNodeAddress;
+    @FXML
+    private Button collInitBtn;
+    @FXML
+    private Button collProcessBtn;
+    @FXML
+    private TableView<Record> collFileList;
+    @FXML
+    private TableColumn<Record, String> collFileNameCol;
+    @FXML
+    private TableColumn<Record, String> collFileStateCol;
+    @FXML
+    private ListView<String> collExecList;
+    @FXML
+    private ListView<String> collLog;
+
+    private Collector collObject;
+
+
+    @FXML
+    private ChoiceBox<String> nodeDistInterface;
+    @FXML
+    private ChoiceBox<String> nodeCollInterface;
+    @FXML
+    private Label nodeDistInterfaceAddress;
+    @FXML
+    private Label nodeCollInterfaceAddress;
+    @FXML
+    private Label nodeState;
+    @FXML
+    private Label nodeCollAddress;
+    @FXML
+    private Button nodeInitBtn;
+    @FXML
+    private TableView<Record> nodeFileList;
+    @FXML
+    private TableColumn<Record, String> nodeFileNameCol;
+    @FXML
+    private TableColumn<Record, String> nodeFileStateCol;
+    @FXML
+    private ListView<String> nodeExecList;
+    @FXML
+    private ListView<String> nodeLog;
+
+    private Node nodeObject;
+
+
 
     public class Record{
         private SimpleStringProperty fieldLeft;
@@ -96,16 +160,61 @@ public class App extends Application {
         distNodeStateCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
 
 
+        collDistInterface.setItems(interfaceList);
+        collDistInterface.getSelectionModel().select(0);
+        collNodeInterface.setItems(interfaceList);
+        collNodeInterface.getSelectionModel().select(0);
+
+        collFileNameCol.setCellValueFactory(new PropertyValueFactory<>("fieldLeft"));
+        collFileStateCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
+
+
+        nodeDistInterface.setItems(interfaceList);
+        nodeDistInterface.getSelectionModel().select(0);
+        nodeCollInterface.setItems(interfaceList);
+        nodeCollInterface.getSelectionModel().select(0);
+
+        nodeFileNameCol.setCellValueFactory(new PropertyValueFactory<>("fieldLeft"));
+        nodeFileStateCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
+
         UI.set(updateLog,
                 distUpdateAddresses,
                 distAddtoCollectorList,
                 distAddtoNodeList,
                 distUpdateBackup,
-                distUpdateLog);
+                distUpdateLog,
+                collUpdateAddresses,
+                collUpdateAttachedDistAddress,
+                collUpdateAttachedNodeAddress,
+                collUpdateFileList,
+                collUpdateExecList,
+                collUpdateLog,
+                nodeUpdateAddresses,
+                nodeUpdateState,
+                nodeUpdateAttachedCollAddress,
+                nodeUpdateFileList,
+                nodeUpdateExecList,
+                nodeUpdateLog);
 
         primaryStage.setTitle("Bankor");
         primaryStage.setScene(new Scene(root, 600, 700));
         primaryStage.show();
+    }
+
+    @Override
+    public void stop(){
+
+        if (distObject != null) {
+            distObject.end();
+        }
+
+        if (collObject != null) {
+            collObject.end();
+        }
+
+        if (nodeObject != null) {
+            nodeObject.end();
+        }
     }
 
     public static void main(String[] args) {
@@ -116,14 +225,15 @@ public class App extends Application {
         @Override
         public void onUpdate(Object... args) {
 
-            distCollInterfaceAddress.setText((String) args[0]);
-            distNodeInterfaceAddress.setText((String) args[1]);
         }
     };
 
+//-------------DISTRIBUTOR----------------------------------
+//----------------------------------------------------------
+
     public void onDistInitClick(Event event) {
 
-        if (distInitBtn.getText().equals("Init")) {
+        if (distObject == null) {
 
             String path = System.getProperty("user.dir") + "/" + Distributor.DISTRIBUTOR_PATH + "/";
 
@@ -156,8 +266,8 @@ public class App extends Application {
         @Override
         public void onUpdate(Object... args) {
 
-            distCollInterfaceAddress.setText((String) args[0]);
-            distNodeInterfaceAddress.setText((String) args[1]);
+            distCollInterfaceAddress.setText(Address.getString((Long) args[0]));
+            distNodeInterfaceAddress.setText(Address.getString((Long) args[1]));
         }
     };
 
@@ -215,8 +325,7 @@ public class App extends Application {
         @Override
         public void onUpdate(Object... args) {
 
-            distCollInterfaceAddress.setText((String) args[0]);
-            distNodeInterfaceAddress.setText((String) args[1]);
+
         }
     };
 
@@ -228,9 +337,234 @@ public class App extends Application {
         }
     };
 
-    @Override
-    public void stop(){
-        System.out.println("Stage is closing");
-        // Save file
+//-------------COLLECTOR------------------------------------
+//----------------------------------------------------------
+
+    public void onCollInitClick(Event event) {
+
+        if (collObject == null) {
+
+            String path = System.getProperty("user.dir") + "/" + Collector.COLLECTOR_PATH + "/";
+
+            collObject = new Collector(collDistInterface.getSelectionModel().getSelectedIndex(),
+                    collNodeInterface.getSelectionModel().getSelectedIndex(), path);
+
+            collInitBtn.setText("Stop");
+
+        } else {
+
+            collObject.end();
+            collObject = null;
+
+            collInitBtn.setText("Init");
+            collDistInterfaceAddress.setText("");
+            collNodeInterfaceAddress.setText("");
+
+        }
     }
+
+    public void onCollProcessClick(Event event) {
+
+        if (collObject != null) {
+
+            collObject.syncTime();
+            collObject.processRule();
+        }
+    }
+
+    public LogCallback collUpdateAddresses = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            collDistInterfaceAddress.setText(Address.getString((Long) args[0]));
+            collNodeInterfaceAddress.setText(Address.getString((Long) args[1]));
+        }
+    };
+
+    public LogCallback collUpdateAttachedDistAddress = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            collDistAddress.setText(Address.getString((Long) args[0]));
+        }
+    };
+
+    public LogCallback collUpdateAttachedNodeAddress = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            collNodeAddress.setText(Address.getString((Long) args[0]));
+        }
+    };
+
+    public LogCallback collUpdateFileList = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            Rule rule = (Rule) args[0];
+
+            for (int j = 0; j < rule.getContentCount(RuleTypes.RULE_FILES); j++) {
+
+                FileContent content = (FileContent) rule.getContent(RuleTypes.RULE_FILES, j);
+                if (content == null) {
+                    return;
+                }
+
+                int i = 0;
+                ObservableList<Record> datas = collFileList.getItems();
+                for (; i < datas.size(); i++) {
+                    Record item = datas.get(i);
+                    if (item.getFieldLeft().equals(content.getPath())) {
+                        break;
+                    }
+                }
+
+                if (i == datas.size()) {
+                    datas.add(new Record("", ""));
+                }
+
+                datas.set(i, new Record(content.getPath(), content.isValid() ? "V" : "I"));
+
+                collFileList.setItems(datas);
+            }
+        }
+    };
+
+    public LogCallback collUpdateExecList = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            Rule rule = (Rule) args[0];
+
+            for (int j = 0; j < rule.getContentCount(RuleTypes.RULE_EXECUTORS); j++) {
+
+                ExecutorContent content = (ExecutorContent) rule.getContent(RuleTypes.RULE_EXECUTORS, j);
+                if (content == null) {
+                    return;
+                }
+
+                collExecList.getItems().add(content.getExecutor());
+            }
+        }
+    };
+
+    public LogCallback collUpdateLog = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            collLog.getItems().add((String) args[0]);
+        }
+    };
+
+
+//-------------NODE-----------------------------------------
+//----------------------------------------------------------
+
+    public void onNodeInitClick(Event event) {
+
+        if (nodeObject == null) {
+
+            String path = System.getProperty("user.dir") + "/" + Node.NODE_PATH + "/";
+
+            nodeObject = new Node(nodeDistInterface.getSelectionModel().getSelectedIndex(),
+                    nodeCollInterface.getSelectionModel().getSelectedIndex(), path);
+
+            nodeInitBtn.setText("Stop");
+
+        } else {
+
+            nodeObject.end();
+            nodeObject = null;
+
+            nodeInitBtn.setText("Init");
+            nodeDistInterfaceAddress.setText("");
+            nodeCollInterfaceAddress.setText("");
+
+        }
+    }
+
+    public LogCallback nodeUpdateAddresses = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            nodeDistInterfaceAddress.setText(Address.getString((Long) args[0]));
+            nodeCollInterfaceAddress.setText(Address.getString((Long) args[1]));
+        }
+    };
+
+    public LogCallback nodeUpdateState = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            nodeState.setText(((NodeStates) args[0]).getName());
+        }
+    };
+
+    public LogCallback nodeUpdateAttachedCollAddress = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            nodeCollAddress.setText(Address.getString((Long) args[0]));
+        }
+    };
+
+    public LogCallback nodeUpdateFileList = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            Rule rule = (Rule) args[0];
+
+            for (int j = 0; j < rule.getContentCount(RuleTypes.RULE_FILES); j++) {
+
+                FileContent content = (FileContent) rule.getContent(RuleTypes.RULE_FILES, j);
+                if (content == null) {
+                    return;
+                }
+
+                int i = 0;
+                ObservableList<Record> datas = nodeFileList.getItems();
+                for (; i < datas.size(); i++) {
+                    Record item = datas.get(i);
+                    if (item.getFieldLeft().equals(content.getPath())) {
+                        break;
+                    }
+                }
+
+                if (i == datas.size()) {
+                    datas.add(new Record("", ""));
+                }
+
+                datas.set(i, new Record(content.getPath(), content.isValid() ? "V" : "I"));
+
+                nodeFileList.setItems(datas);
+            }
+        }
+    };
+
+    public LogCallback nodeUpdateExecList = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            Rule rule = (Rule) args[0];
+
+            for (int j = 0; j < rule.getContentCount(RuleTypes.RULE_EXECUTORS); j++) {
+
+                ExecutorContent content = (ExecutorContent) rule.getContent(RuleTypes.RULE_EXECUTORS, j);
+                if (content == null) {
+                    return;
+                }
+
+                nodeExecList.getItems().add(content.getExecutor());
+            }
+        }
+    };
+
+    public LogCallback nodeUpdateLog = new LogCallback() {
+        @Override
+        public void onUpdate(Object... args) {
+
+            nodeLog.getItems().add((String) args[0]);
+        }
+    };
+
 }

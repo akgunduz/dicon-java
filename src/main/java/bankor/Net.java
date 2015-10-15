@@ -25,8 +25,6 @@ public class Net extends Interface {
 
         super(Interfaces.INTERFACE_NET, index, cb, rootPath);
 
-        System.out.println("Net.Net -> " + "Instance is created!!!");
-
     }
 
     @Override
@@ -135,7 +133,7 @@ public class Net extends Interface {
                                     }
 
                                 } catch (Exception e) {
-                                    System.out.println("Net.runReceiver -> " + e.getMessage());
+                                    System.out.println("Net.onReceive -> " + e.getMessage());
                                 }
                             }
                         }
@@ -157,7 +155,7 @@ public class Net extends Interface {
                 }
 
             } catch (Exception e) {
-                System.out.println("Net.runReceiver -> " + e.getMessage());
+                System.out.println("Net.onReceive -> " + e.getMessage());
                 return;
             }
         }
@@ -193,7 +191,7 @@ public class Net extends Interface {
                 }
 
             } catch (Exception e) {
-                System.out.println("Net.runSender -> " + e.getMessage());
+                System.out.println("Net.onSend -> " + e.getMessage());
             }
         }
     }
@@ -231,7 +229,7 @@ public class Net extends Interface {
             }
 
         } catch (Exception e) {
-            System.out.println("NetAddress.getInetAddress-> " + e.getMessage());
+            System.out.println("NetAddress.getInterfaces-> " + e.getMessage());
             return null;
         }
 

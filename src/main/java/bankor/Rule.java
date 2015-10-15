@@ -20,7 +20,7 @@ public class Rule {
     private boolean valid;
     private boolean parallel;
 
-    private List<Content>[] contentList = (ArrayList<Content>[])new ArrayList[RuleTypes.getSize()];
+    private List<Content>[] contentList = new ArrayList[RuleTypes.getSize()];
 
     private Map<String, RuleCallback> ruleMap = new HashMap<>(RuleTypes.getSize());
 
@@ -32,6 +32,10 @@ public class Rule {
 
         if (path.isEmpty()) {
             return;
+        }
+
+        for( int i = 0; i < contentList.length; i++) {
+            contentList[i] = new ArrayList<>();
         }
 
         ruleMap.put(RuleTypes.RULE_RUNTYPE.getName(), parseRunTypeNode);
@@ -52,7 +56,7 @@ public class Rule {
             return;
         }
 
-        if (!parseBuffer(buffer)) {
+        if (!parseBuffer(new String(buffer))) {
             System.out.println("Rule.Rule -> " + "Could not parse rule file");
             return;
         }
@@ -203,7 +207,7 @@ public class Rule {
         }
     };
 
-    boolean parseBuffer(byte[] buffer) {
+    boolean parseBuffer(String buffer) {
 
         JSONObject parser = new JSONObject(buffer);
 

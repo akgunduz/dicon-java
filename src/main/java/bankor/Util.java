@@ -70,7 +70,7 @@ public class Util {
 
     public static byte[] strToHex(String str) {
 
-        int len = str.length();
+        int len = str.length() - 1;
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
             data[i / 2] = (byte) ((Character.digit(str.charAt(i), 16) << 4)

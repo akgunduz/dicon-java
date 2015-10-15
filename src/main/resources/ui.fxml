@@ -20,15 +20,15 @@
                             </columns>
                         </TableView>
                         <Label layoutX="14.0" layoutY="32.0" text="Collector Interface :" />
-                        <Label layoutX="321.0" layoutY="31.0" text="Node Interface :" />
-                        <Label layoutX="14.0" layoutY="74.0" text="Collector Address :" />
-                        <Label layoutX="321.0" layoutY="73.0" text="Node Address :" />
-                        <Label fx:id="distCollInterfaceAddress" layoutX="144.0" layoutY="74.0" text="" />
-                        <Label fx:id="distNodeInterfaceAddress" layoutX="433.0" layoutY="73.0" text="" />
+                        <Label layoutX="315.0" layoutY="31.0" text="Node Interface :" />
+                        <Label layoutX="14.0" layoutY="70.0" text="Collector Interface Address :" />
+                        <Label layoutX="315.0" layoutY="70.0" text="Node Interface Address :" />
+                        <Label fx:id="distCollInterfaceAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="189.0" layoutY="71.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                        <Label fx:id="distNodeInterfaceAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="478.0" layoutY="71.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
                         <Label layoutX="14.0" layoutY="107.0" text="Backup Rate :" />
-                        <TextField layoutX="144.0" layoutY="102.0" prefHeight="26.0" prefWidth="150.0" promptText="0" />
-                        <Label layoutX="321.0" layoutY="106.0" text="Backup Status :" />
-                        <Label layoutX="433.0" layoutY="106.0" text="BACKUPS" />
+                        <TextField fx:id="distBackupRate" layoutX="144.0" layoutY="102.0" prefHeight="26.0" prefWidth="150.0" promptText="0" />
+                        <Label layoutX="315.0" layoutY="106.0" text="Backup Status :" />
+                        <Label fx:id="distBackupStatus" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="520.0" layoutY="106.0" text="BACKUPS" />
                         <Button fx:id="distInitBtn" layoutX="14.0" layoutY="153.0" mnemonicParsing="false" onAction="#onDistInitClick" prefHeight="50.0" prefWidth="280.0" text="Init" />
                         <Button fx:id="distPollBtn" layoutX="306.0" layoutY="153.0" mnemonicParsing="false" onAction="#onDistPollClick" prefHeight="50.0" prefWidth="280.0" text="Poll" />
                         <TableView fx:id="distNodeList" layoutX="306.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
@@ -38,20 +38,76 @@
                                 <TableColumn fx:id="distNodeStateCol" editable="false" prefWidth="75.0" text="State" />
                             </columns>
                         </TableView>
-                        <Label layoutX="133.0" layoutY="218.0" text="Collectors" />
-                        <Label layoutX="432.0" layoutY="218.0" text="Nodes" />
-                  <ListView fx:id="distLog" layoutX="14.0" layoutY="453.0" prefHeight="200.0" prefWidth="572.0" />
-                    </children></AnchorPane>
+                        <Label layoutX="124.0" layoutY="218.0" text="Collectors" />
+                        <Label layoutX="427.0" layoutY="218.0" text="Nodes" />
+                        <ListView fx:id="distLog" layoutX="14.0" layoutY="453.0" prefHeight="200.0" prefWidth="572.0" />
+                    </children>
+                </AnchorPane>
             </content>
         </Tab>
         <Tab text="Collector">
             <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <children>
+                        <ChoiceBox fx:id="collDistInterface" layoutX="144.0" layoutY="27.0" prefHeight="26.0" prefWidth="150.0" />
+                        <ChoiceBox fx:id="collNodeInterface" layoutX="433.0" layoutY="26.0" prefWidth="150.0" />
+                        <TableView fx:id="collFileList" layoutX="14.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
+                            <columnResizePolicy><TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                            <columns>
+                                <TableColumn fx:id="collFileNameCol" editable="false" prefWidth="220.0" sortable="false" text="Name" />
+                                <TableColumn fx:id="collFileStateCol" editable="false" prefWidth="58.0" sortable="false" text="State" />
+                            </columns>
+                        </TableView>
+                        <Label layoutX="14.0" layoutY="32.0" text="Distributor Interface :" />
+                        <Label layoutX="315.0" layoutY="31.0" text="Node Interface :" />
+                        <Label layoutX="14.0" layoutY="70.0" text="Distributor Interface Address :" />
+                        <Label layoutX="315.0" layoutY="70.0" text="Node Interface Address :" />
+                        <Label fx:id="collDistInterfaceAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="189.0" layoutY="71.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                        <Label fx:id="collNodeInterfaceAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="478.0" layoutY="71.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                        <Label layoutX="14.0" layoutY="107.0" text="Distributor Address :" />
+                        <Label layoutX="315.0" layoutY="106.0" text="Node Address :" />
+                        <Label fx:id="collNodeAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="478.0" layoutY="106.0" prefHeight="16.0" prefWidth="105.0" text="BACKUPS" />
+                        <Button fx:id="collInitBtn" layoutX="14.0" layoutY="153.0" mnemonicParsing="false" onAction="#onCollInitClick" prefHeight="50.0" prefWidth="280.0" text="Init" />
+                        <Button fx:id="collProcessBtn" layoutX="306.0" layoutY="153.0" mnemonicParsing="false" onAction="#onCollProcessClick" prefHeight="50.0" prefWidth="280.0" text="Process" />
+                        <ListView fx:id="collExecList" layoutX="306.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0" />
+                        <Label layoutX="140.0" layoutY="218.0" text="Files" />
+                        <Label layoutX="416.0" layoutY="218.0" text="Executors" />
+                        <ListView fx:id="collLog" layoutX="14.0" layoutY="453.0" prefHeight="200.0" prefWidth="572.0" />
+                        <Label fx:id="collDistAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="189.0" layoutY="106.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                    </children>
+                </AnchorPane>
             </content>
         </Tab>
         <Tab text="Node">
             <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                    <children>
+                        <ChoiceBox fx:id="nodeDistInterface" layoutX="144.0" layoutY="27.0" prefHeight="26.0" prefWidth="150.0" />
+                        <ChoiceBox fx:id="nodeCollInterface" layoutX="433.0" layoutY="26.0" prefWidth="150.0" />
+                        <TableView fx:id="nodeFileList" layoutX="14.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0">
+                            <columnResizePolicy><TableView fx:constant="UNCONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+                            <columns>
+                                <TableColumn fx:id="nodeFileNameCol" editable="false" prefWidth="220.0" sortable="false" text="Name" />
+                                <TableColumn fx:id="nodeFileStateCol" editable="false" prefWidth="58.0" sortable="false" text="State" />
+                            </columns>
+                        </TableView>
+                        <Label layoutX="14.0" layoutY="32.0" text="Distributor Interface :" />
+                        <Label layoutX="312.0" layoutY="31.0" text="Collector Interface :" />
+                        <Label layoutX="14.0" layoutY="70.0" text="Distributor Interface Address :" />
+                        <Label layoutX="312.0" layoutY="71.0" text="Collector Interface Address :" />
+                        <Label fx:id="nodeDistInterfaceAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="189.0" layoutY="71.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                        <Label fx:id="nodeCollInterfaceAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="478.0" layoutY="71.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                        <Label layoutX="14.0" layoutY="107.0" text="State :" />
+                        <Label layoutX="312.0" layoutY="106.0" text="Collector Address :" />
+                        <Label fx:id="nodeState" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="189.0" layoutY="106.0" prefHeight="16.0" prefWidth="105.0" text="TEST" />
+                        <Label fx:id="nodeCollAddress" alignment="CENTER_RIGHT" contentDisplay="RIGHT" layoutX="478.0" layoutY="106.0" prefHeight="16.0" prefWidth="105.0" text="BACKUPS" />
+                        <Button fx:id="nodeInitBtn" layoutX="14.0" layoutY="153.0" mnemonicParsing="false" onAction="#onNodeInitClick" prefHeight="50.0" prefWidth="572.0" text="Init" />
+                        <ListView fx:id="nodeExecList" layoutX="306.0" layoutY="244.0" prefHeight="202.0" prefWidth="280.0" />
+                        <Label layoutX="140.0" layoutY="218.0" text="Files" />
+                        <Label layoutX="416.0" layoutY="218.0" text="Executors" />
+                        <ListView fx:id="nodeLog" layoutX="14.0" layoutY="453.0" prefHeight="200.0" prefWidth="572.0" />
+                    </children>
+                </AnchorPane>
             </content>
         </Tab>
     </tabs>

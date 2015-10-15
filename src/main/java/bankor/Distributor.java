@@ -21,8 +21,8 @@ public class Distributor extends Component implements NodeCallback {
 
         nodeManager = new NodeManager(this, backupRate);
 
-        UI.DIST_ADDRESS.update(Address.getString(connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress()),
-                Address.getString(connectors[HostTypes.HOST_NODE.getId()].getAddress()));
+        UI.DIST_ADDRESS.update(connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress(),
+                connectors[HostTypes.HOST_NODE.getId()].getAddress());
     }
 
     @Override
@@ -211,10 +211,10 @@ public class Distributor extends Component implements NodeCallback {
 
         List<Long> list = connectors[index].getAddressList();
 
-        for (int i = 0; i < list.size(); i++) {
+        for (Long item : list) {
 
             Message msg = new Message(HostTypes.HOST_DISTRIBUTOR, MessageTypes.MSGTYPE_WAKEUP, getRootPath());
-            connectors[index].send(list.get(i), msg);
+            connectors[index].send(item, msg);
 
         }
 

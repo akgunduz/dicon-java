@@ -7,12 +7,17 @@ import java.io.File;
  */
 public class Node extends Component {
 
+    public static final String NODE_PATH = "Node";
+
     long distributorAddress = 0;
 
     Rule rule;
 
     public Node(int distributorIndex, int collectorIndex, String rootPath) {
         super(generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath);
+
+        UI.NODE_ADDRESS.update(connectors[HostTypes.HOST_DISTRIBUTOR.getId()].getAddress(),
+                connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress());
     }
 
     @Override
@@ -26,8 +31,7 @@ public class Node extends Component {
 
                 distributorAddress = address;
 
-        //        LOG_U(UI_UPDATE_CLIENT_LOG,
-        //                "\"WAKEUP\" msg from distributor: %s", Address::getString(address).c_str());
+                UI.NODE_LOG.update("\"WAKEUP\" msg from distributor: " + Address.getString(address));
 
                 status = send2DistributorMsg(address, MessageTypes.MSGTYPE_ALIVE);
                 break;
@@ -49,22 +53,21 @@ public class Node extends Component {
 
             case MSGTYPE_RULE:
 
-             //   LOG_U(UI_UPDATE_CLIENT_STATE, BUSY);
-                status = send2DistributorMsg(distributorAddress, MessageTypes.MSGTYPE_BUSY);
+                UI.NODE_STATE.update(NodeStates.BUSY);
+                UI.NODE_LOG.update("\"RULE\" msg from collector: " + Address.getString(address));
 
-         //       LOG_U(UI_UPDATE_CLIENT_LOG,
-         //               "\"RULE\" msg from collector: %s", Address::getString(address).c_str());
+                status = send2DistributorMsg(distributorAddress, MessageTypes.MSGTYPE_BUSY);
 
                 rule = msg.getRule();
 
                 if (!processMD5()) {
-             //       LOG_E("Processing MD5 failed!!!");
+                    UI.NODE_LOG.update("Processing MD5 failed!!!");
                     break;
                 }
 
-         //       LOG_U(UI_UPDATE_CLIENT_FILE_LIST, mRule);
-         //       LOG_U(UI_UPDATE_CLIENT_PARAM_LIST, mRule);
-          //      LOG_U(UI_UPDATE_CLIENT_EXEC_LIST, mRule);
+                UI.NODE_ATT_COLL_ADDRESS.update(address);
+                UI.NODE_FILE_LIST.update(rule);
+                UI.NODE_EXEC_LIST.update(rule);
 
                 status &= send2CollectorMsg(address, MessageTypes.MSGTYPE_MD5);
                 break;
@@ -76,15 +79,13 @@ public class Node extends Component {
                     rule = new Rule(getRootPath(), Rule.RULE_FILE);
                 }
 
-         //       LOG_U(UI_UPDATE_CLIENT_LOG,
-         //               "\"BINARY\" msg from collector: %s with \"%d\" file binary",
-         //               Address::getString(address).c_str(), 0/*msg->getReceivedBinaryCount()*/);
-
-      //          LOG_U(UI_UPDATE_CLIENT_FILE_LIST, mRule);
+                UI.NODE_FILE_LIST.update(rule);
+                UI.NODE_LOG.update("\"BINARY\" msg from collector: " + Address.getString(address));
 
                 processRule();
 
-       //         LOG_U(UI_UPDATE_CLIENT_STATE, IDLE);
+                UI.NODE_STATE.update(NodeStates.IDLE);
+
                 status = send2DistributorMsg(distributorAddress, MessageTypes.MSGTYPE_READY);
                 break;
 
@@ -109,23 +110,17 @@ public class Node extends Component {
 
             case MSGTYPE_READY:
 
-            //    LOG_U(UI_UPDATE_CLIENT_LOG,
-           //             "\"READY\" msg sent to distributor: %s",
-           //             Address::getString(address).c_str());
+                UI.NODE_LOG.update("\"READY\" msg sent to distributor: " + Address.getString(address));
                 break;
 
             case MSGTYPE_ALIVE:
 
-     //           LOG_U(UI_UPDATE_CLIENT_LOG,
-     //                   "\"ALIVE\" msg sent to distributor: %s",
-    //                    Address::getString(address).c_str());
+                UI.NODE_LOG.update("\"ALIVE\" msg sent to distributor: " + Address.getString(address));
                 break;
 
             case MSGTYPE_BUSY:
 
-       //         LOG_U(UI_UPDATE_CLIENT_LOG,
-       //                 "\"BUSY\" msg sent to distributor: %s",
-        //                Address::getString(address).c_str());
+                UI.NODE_LOG.update("\"BUSY\" msg sent to distributor: " + Address.getString(address));
                 break;
 
             default:
@@ -145,9 +140,8 @@ public class Node extends Component {
             case MSGTYPE_MD5:
 
                 msg.setRule(Message.STREAM_MD5ONLY, rule);
-        //        LOG_U(UI_UPDATE_CLIENT_LOG,
-        //                "\"MD5\" msg sent to collector: %s with \"%d\" MD5 info",
-         //               Address::getString(address).c_str(), mRule->getFlaggedFileCount());
+                UI.NODE_LOG.update("\"MD5\" msg sent to collector: " + Address.getString(address) +
+                    " with MD5 count: " + rule.getFlaggedFileCount());
                 break;
 
             default:
@@ -183,12 +177,15 @@ public class Node extends Component {
 
     void processExecutor(String cmd) {
 
- //       LOG_I("ExecV run with cmd : %s", cmdargs[0]);
+        UI.NODE_LOG.update("Executing command: " + cmd);
+
         try {
+
             Runtime.getRuntime().exec(cmd);
 
         } catch (Exception e) {
-            //      LOG_E("ExecV failed with error : %d", errno);
+
+            UI.NODE_LOG.update("Execution: " + cmd + " failed!!!");
         }
     }
 
@@ -199,8 +196,6 @@ public class Node extends Component {
             for (int i = 0; i < rule.getContentCount(RuleTypes.RULE_EXECUTORS); i++) {
                 ExecutorContent content = (ExecutorContent) rule.getContent(RuleTypes.RULE_EXECUTORS, i);
                 String cmd = content.getParsed(rule);
-          //      LOG_U(UI_UPDATE_CLIENT_LOG,
-          //              "Executing %s command", cmd.c_str());
                 processExecutor(cmd);
             }
 
