@@ -14,6 +14,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -465,6 +468,15 @@ public class App extends Application {
         if (nodeObject == null) {
 
             String path = System.getProperty("user.dir") + "/" + Node.NODE_PATH + "/";
+
+            try {
+                if (Files.notExists(Paths.get(path))) {
+                    Files.createDirectories(Paths.get(path));
+                }
+            } catch (Exception e) {
+                UI.NODE_LOG.update("Could not create node directory");
+                return;
+            }
 
             nodeObject = new Node(nodeDistInterface.getSelectionModel().getSelectedIndex(),
                     nodeCollInterface.getSelectionModel().getSelectedIndex(), path);

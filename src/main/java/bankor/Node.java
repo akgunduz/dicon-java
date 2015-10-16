@@ -1,6 +1,7 @@
 package bankor;
 
 import java.io.File;
+import java.nio.file.Files;
 
 /**
  * Created by akgunduz on 10/11/15.
@@ -104,7 +105,7 @@ public class Node extends Component {
 
     boolean send2DistributorMsg(long address, MessageTypes type) {
 
-        Message msg = new Message(HostTypes.HOST_COLLECTOR, type, getRootPath());
+        Message msg = new Message(HostTypes.HOST_NODE, type, getRootPath());
 
         switch(type) {
 
@@ -133,7 +134,7 @@ public class Node extends Component {
 
     boolean send2CollectorMsg(long address, MessageTypes type) {
 
-        Message msg = new Message(HostTypes.HOST_DISTRIBUTOR, type, getRootPath());
+        Message msg = new Message(HostTypes.HOST_NODE, type, getRootPath());
 
         switch(type) {
 
@@ -196,6 +197,8 @@ public class Node extends Component {
             for (int i = 0; i < rule.getContentCount(RuleTypes.RULE_EXECUTORS); i++) {
                 ExecutorContent content = (ExecutorContent) rule.getContent(RuleTypes.RULE_EXECUTORS, i);
                 String cmd = content.getParsed(rule);
+                File executable = new File(cmd.substring(0, cmd.indexOf(' ')));
+                executable.setExecutable(true);
                 processExecutor(cmd);
             }
 

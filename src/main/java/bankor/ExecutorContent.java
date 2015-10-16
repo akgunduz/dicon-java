@@ -14,7 +14,7 @@ public class ExecutorContent extends Content {
         exec = line;
     }
 
-    boolean parseCommand(String parsed, Rule rule, RuleTypes cmdType, int cmdIndex) {
+    boolean parseCommand(StringBuilder parsed, Rule rule, RuleTypes cmdType, int cmdIndex) {
 
         Content content = rule.getContent(cmdType, cmdIndex);
         if (content == null) {
@@ -22,21 +22,10 @@ public class ExecutorContent extends Content {
         }
 
         if (cmdType == RuleTypes.RULE_FILES) {
-            parsed += rule.getRootPath() + ((FileContent) content).getPath();
+            parsed.append(rule.getRootPath() + ((FileContent) content).getPath());
 
         } else if (cmdType == RuleTypes.RULE_PARAMETERS) {
-            ParameterContent pc = (ParameterContent) content;
-            switch(pc.getParameterType()) {
-                case PARAMETER_LONG:
-                    parsed += (Integer)pc.getParameter();
-                    break;
-                case PARAMETER_DOUBLE:
-                    parsed += (Double)pc.getParameter();
-                    break;
-                case PARAMETER_STRING:
-                    parsed += pc.getParameter();
-                    break;
-            }
+            parsed.append(((ParameterContent) content).getParameter());
         }
 
         return true;
@@ -44,7 +33,7 @@ public class ExecutorContent extends Content {
 
     String getParsed(Rule rule) {
 
-        String parsed = "";
+        StringBuilder parsed = new StringBuilder();
         boolean cmdMode = false;
 
         int cmdIndex = 0;
@@ -97,7 +86,7 @@ public class ExecutorContent extends Content {
                     }
                     //no break
                 default:
-                    parsed += exec.charAt(i);
+                    parsed.append(exec.charAt(i));
                     break;
 
             }
@@ -108,7 +97,7 @@ public class ExecutorContent extends Content {
             parseCommand(parsed, rule, cmdType, cmdIndex);
         }
 
-        return parsed;
+        return parsed.toString();
     }
 
     @Override

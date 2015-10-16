@@ -4,13 +4,13 @@ package bankor;
  * Created by akgunduz on 30/08/15.
  */
 
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.util.Random;
 
@@ -209,6 +209,9 @@ public abstract class BaseMessage implements MessageCallback {
                     break;
                 }
 
+                buf.rewind();
+                buf.limit(readSize);
+
                 ctx.update(buf);
 
             } while (size > 0);
@@ -391,7 +394,13 @@ public abstract class BaseMessage implements MessageCallback {
 
         try {
 
-            RandomAccessFile file = new RandomAccessFile(path, "rw");
+            String dir = path.substring(0, path.lastIndexOf('/'));
+
+            if (Files.notExists(Paths.get(dir))) {
+                Files.createDirectories(Paths.get(dir));
+            }
+
+            FileOutputStream file = new FileOutputStream(path);
 
             FileChannel out = file.getChannel();
 
@@ -402,12 +411,17 @@ public abstract class BaseMessage implements MessageCallback {
 
             if (status && md5 != null) {
 
-                file = new RandomAccessFile(path + ".md5", "rw");
-                if (!writeBlock(out, ByteBuffer.wrap(md5.toString().getBytes()), MD5_DIGEST_LENGTH * 2)) {
+                file = new FileOutputStream(path + ".md5");
+                out = file.getChannel();
+                String sMD5 = Util.hexToStr(md5.array());
+                if (!writeBlock(out, ByteBuffer.wrap(sMD5.getBytes()), MD5_DIGEST_LENGTH * 2)) {
                     System.out.println("Message.readBinary -> " + "Can not write md5 to file system");
                     status = false;
                 }
 
+                md5.rewind();
+
+                out.close();
                 file.close();
             }
 
