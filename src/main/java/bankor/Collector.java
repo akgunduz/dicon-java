@@ -14,7 +14,7 @@ public class Collector extends Component {
     Map<Long, Rule> rules = new HashMap<>();
 
     public Collector(int distributorIndex, int nodeIndex, String rootPath) {
-        super(generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath);
+        super(new Unit(HostTypes.HOST_COLLECTOR, Util.getID()), generateIndex(distributorIndex, 0xFFFF, nodeIndex), rootPath);
 
         UI.COLL_ADDRESS.update(connectors[HostTypes.HOST_DISTRIBUTOR.getId()].getAddress(),
                 connectors[HostTypes.HOST_NODE.getId()].getAddress());
@@ -41,6 +41,7 @@ public class Collector extends Component {
             case MSGTYPE_NODE:
 
                 long nodeAddress = msg.getVariant(0);
+                short nodeID = (short) msg.getVariant(1);
 
                 if (nodeAddress == 0) {
                     UI.COLL_LOG.update("\"NODE\" msg from distributor: " + Address.getString(address) + " No Available Node!!!");
@@ -50,7 +51,7 @@ public class Collector extends Component {
                     break;
                 }
 
-                Rule rule = new Rule(getRootPath(), Rule.RULE_FILE);
+                Rule rule = new Rule(new Unit(HostTypes.HOST_COLLECTOR), new Unit(HostTypes.HOST_NODE, nodeID), getRootPath());
                 if (!rule.isValid()) {
                     UI.COLL_LOG.update("Could not create a rule from path : " + getRootPath());
                     return false;

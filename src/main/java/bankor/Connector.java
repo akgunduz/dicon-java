@@ -9,9 +9,9 @@ public class Connector {
 
     Interface _interface;
 
-    public Connector(int index, InterfaceCallback callback, String rootPath) {
+    public Connector(Unit host, int index, InterfaceCallback callback, String rootPath) {
 
-        _interface = new Net(index, callback, rootPath);
+        _interface = new Net(host, index, callback, rootPath);
 
     }
 

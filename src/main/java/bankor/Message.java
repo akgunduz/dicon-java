@@ -25,23 +25,31 @@ public class Message extends BaseMessage {
     private String rootPath;
     public List<ByteBuffer> md5List = new ArrayList<>();
 
-    public Message(String rootPath) {
+    public Message(HostTypes host, String rootPath) {
+        this(new Unit(host), rootPath);
+    }
 
+    public Message(Unit host, String rootPath) {
+        super(host);
         this.rule = null;
         this.rootPath = rootPath;
     }
 
     public Message(HostTypes owner, MessageTypes type, String rootPath) {
+        this(new Unit(owner), type, rootPath);
+    }
 
-        super(owner.getId(), type.getId());
+    public Message(Unit owner, MessageTypes type, String rootPath) {
+
+        super(owner, type.getId());
         this.rule = null;
         this.rootPath = rootPath;
 
         setStreamFlag(STREAM_NONE);
     }
 
-    HostTypes getOwner() {
-        return HostTypes.getHost((int)getDeviceID());
+    public String getRootPath() {
+        return rootPath;
     }
 
     public Rule getRule() {
@@ -77,7 +85,14 @@ public class Message extends BaseMessage {
             System.out.println("Message.readFileBinary -> " + "can not read path data");
             return false;
         }
-        content.setPath(path.toString());
+
+        long[] fileType = new long[1];
+        if (!readNumber(in, fileType)) {
+            System.out.println("Message.readFileBinary -> " + "can not read MD5 data");
+            return false;
+        }
+
+        content.setFile(getHost(), getOwner(), getRootPath(), path.toString(), FileTypes.getType((int)fileType[0]));
 
         if (header.sizes[1] != MD5_DIGEST_LENGTH) {
             System.out.println("Message.readFileBinary -> " + "Md5 size must be" + MD5_DIGEST_LENGTH + " long");
@@ -92,7 +107,7 @@ public class Message extends BaseMessage {
         content.setMD5(md5);
 
         ByteBuffer calcmd5 = ByteBuffer.allocate(MD5_DIGEST_LENGTH);
-        if (!readBinary(in, rootPath + path, calcmd5, header.sizes[2])) {
+        if (!readBinary(in, content.getAbsPath(), calcmd5, content.getMD5Path(), header.sizes[2])) {
             System.out.println("Message.readFileBinary -> " + "can not read Binary data");
             return false;
         }
@@ -134,21 +149,14 @@ public class Message extends BaseMessage {
                     return false;
                 }
 
-                if (rule == null) {
+                if (fileContent.getFileType() == FileTypes.FILE_RULE) {
 
-                    rule = new Rule(rootPath);
-
+                    rule = new Rule(getHost(), getOwner(), getRootPath(), fileContent);
                 }
-
-                if (rule.isValid() && fileContent.getPath().equals(Rule.RULE_FILE)) {
-
-                    rule.updateFileContent(fileContent);
-
-                }
-
                 break;
 
             case BLOCK_FILE_MD5:
+
                     ByteBuffer md5 = ByteBuffer.allocate(MD5_DIGEST_LENGTH);
                     if (!readFileMD5(in, blockHeader, md5)) {
                     return false;
@@ -190,6 +198,10 @@ public class Message extends BaseMessage {
             return false;
         }
 
+        if (!writeNumber(out, content.getFileType().ordinal())) {
+            return false;
+        }
+
         if (!writeMD5(out, content.getMD5())) {
             return false;
         }
@@ -228,7 +240,7 @@ public class Message extends BaseMessage {
         switch(streamFlag) {
 
             case STREAM_RULE:
-                if (!writeFileBinary(out, rule.getRuleFile())) {
+                if (!writeFileBinary(out, rule.getContent())) {
                     return false;
                 }
                 break;

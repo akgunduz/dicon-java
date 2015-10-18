@@ -8,25 +8,26 @@ import java.util.Map;
  */
 public class NodeManager {
 
-    private NodeCallback nodeCallback;
-    private double backupRate;
+    private Map<Long, NodeItem> nodes = new HashMap<>();
 
+    private NodeCallback nodeCallback;
+
+    private double backupRate;
     private int readyBackup = 0;
     private int totalBackup = 0;
-    private NodeWatchdog nodeWatchdog = null;
 
-    private Map<Long, NodeItem> nodes = new HashMap<>();
+    private NodeWatchdog nodeWatchdog = null;
 
     public NodeManager(NodeCallback nodeCallback, double backupRate) {
 
         this.nodeCallback = nodeCallback;
         this.backupRate = backupRate;
         if (nodeWatchdog == null) {
-            //nodeWatchdog = new NodeWatchdog(nodeCallback);
+            nodeWatchdog = new NodeWatchdog(nodeCallback);
         }
     }
 
-    public long getIdle(long collectorAddress) {
+    public NodeItem getIdle(long collectorAddress) {
 
         NodeItem leastUsedNode = null;
 
@@ -63,17 +64,17 @@ public class NodeManager {
         //    LOG_T("Client at address : %s returned to collector",
         //            Address::getString(leastUsedClient->address).c_str());
 
-            return leastUsedNode.address;
+            return leastUsedNode;
 
         } else {
 
         //    LOG_W("No available client right now.");
         }
 
-        return 0;
+        return null;
     }
 
-    boolean setIdle(long address, double totalTime) {
+    boolean setIdle(long address, short id, double totalTime) {
 
         NodeItem node = nodes.get(address);
 
@@ -81,7 +82,7 @@ public class NodeManager {
             node.state = NodeStates.IDLE;
             // LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[IDLE]);
 
-            if (node.diffTime.isInitiated()) {
+            if (node.stopWatch.isInitiated()) {
 
                 //     LOG_U(UI_UPDATE_DIST_LOG,
                 //              "Client at address : %s finished job in %.3lf seconds, total time passed : %.3lf",
@@ -92,16 +93,16 @@ public class NodeManager {
 
         } else {
 
-            add(address);
+            add(address, id);
             return false;
         }
     }
 
-    boolean validate(long address) {
+    boolean validate(long address, short id) {
 
         NodeItem node = nodes.get(address);
         if (node == null) {
-            add(address);
+            add(address, id);
             return false;
         }
 
@@ -119,7 +120,7 @@ public class NodeManager {
             }
             node.state = NodeStates.BUSY;
             node.usage++;
-            node.diffTime.start();
+            node.stopWatch.start();
             //LOG_T("Client at address : %s switch to state : %s", Address::getString(address).c_str(), sStates[BUSY]);
             return true;
         } else {
@@ -143,9 +144,9 @@ public class NodeManager {
         }
     }
 
-    boolean add(long address) {
+    boolean add(long address, short id) {
 
-        nodes.put(address, new NodeItem(NodeStates.IDLE, 0, address));
+        nodes.put(address, new NodeItem(NodeStates.IDLE, 0, address, id));
 
         totalBackup = nodes.size() == 1 ? 0 : (int)Math.ceil(nodes.size() * backupRate);
 
@@ -162,7 +163,7 @@ public class NodeManager {
         for (Map.Entry<Long, NodeItem> entry : nodes.entrySet()) {
 
             NodeItem node = entry.getValue();
-            node.diffTime.reset();
+            node.stopWatch.reset();
         }
 
         return true;
@@ -173,5 +174,18 @@ public class NodeManager {
         nodes.clear();
         readyBackup = 0;
         totalBackup = 0;
+    }
+
+    void end() {
+
+        if (nodeWatchdog != null) {
+            nodeWatchdog.end();
+        }
+
+        for (Map.Entry<Long, NodeItem> entry : nodes.entrySet()) {
+
+            NodeItem node = entry.getValue();
+            node.end();
+        }
     }
 }

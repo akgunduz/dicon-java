@@ -8,7 +8,7 @@ public abstract class Component implements SchedulerCallback, ComponentCallback 
     protected Connector[] connectors = new Connector[HostTypes.getMax()];
     private String rootPath;
 
-    public Component(long index, String rootPath) {
+    public Component(Unit host, long index, String rootPath) {
 
         InterfaceCallback interfaceCallback = new InterfaceCallback(this, this);
 
@@ -18,7 +18,7 @@ public abstract class Component implements SchedulerCallback, ComponentCallback 
 
         if (indexDist != 0xFFFF) {
 
-            connectors[HostTypes.HOST_DISTRIBUTOR.getId()] = new Connector(indexDist, interfaceCallback, rootPath);
+            connectors[HostTypes.HOST_DISTRIBUTOR.getId()] = new Connector(host, indexDist, interfaceCallback, rootPath);
 
         }
 
@@ -26,7 +26,7 @@ public abstract class Component implements SchedulerCallback, ComponentCallback 
 
             if (indexCollector != indexDist) {
 
-                connectors[HostTypes.HOST_COLLECTOR.getId()] = new Connector(indexCollector, interfaceCallback, rootPath);
+                connectors[HostTypes.HOST_COLLECTOR.getId()] = new Connector(host, indexCollector, interfaceCallback, rootPath);
 
             } else {
 
@@ -38,7 +38,7 @@ public abstract class Component implements SchedulerCallback, ComponentCallback 
 
             if (indexNode != indexDist && indexNode != indexCollector) {
 
-                connectors[HostTypes.HOST_NODE.getId()] = new Connector(indexNode, interfaceCallback, rootPath);
+                connectors[HostTypes.HOST_NODE.getId()] = new Connector(host, indexNode, interfaceCallback, rootPath);
 
             } else {
 
@@ -78,13 +78,13 @@ public abstract class Component implements SchedulerCallback, ComponentCallback 
     @Override
     public boolean onProcess(long address, Message msg) {
 
-        if (!connectors[msg.getOwner().getId()].getInterfaceType().equals(Address.getInterface(address))) {
+        if (!connectors[msg.getOwner().getType().getId()].getInterfaceType().equals(Address.getInterface(address))) {
 
          //   LOG_W("Wrong message received : %d from %s, disgarding", msg->getType(), Address::getString(address).c_str());
             return false;
         }
 
-        switch(msg.getOwner()) {
+        switch(msg.getOwner().getType()) {
 
             case HOST_DISTRIBUTOR:
                 return processDistributorMsg(address, msg);

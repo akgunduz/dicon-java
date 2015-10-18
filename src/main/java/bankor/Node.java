@@ -15,7 +15,7 @@ public class Node extends Component {
     Rule rule;
 
     public Node(int distributorIndex, int collectorIndex, String rootPath) {
-        super(generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath);
+        super(new Unit(HostTypes.HOST_NODE, Util.getID()), generateIndex(distributorIndex, collectorIndex, 0xFFFF), rootPath);
 
         UI.NODE_ADDRESS.update(connectors[HostTypes.HOST_DISTRIBUTOR.getId()].getAddress(),
                 connectors[HostTypes.HOST_COLLECTOR.getId()].getAddress());
@@ -74,11 +74,6 @@ public class Node extends Component {
                 break;
 
             case MSGTYPE_BINARY:
-
-                rule = msg.getRule();
-                if (rule == null) {
-                    rule = new Rule(getRootPath(), Rule.RULE_FILE);
-                }
 
                 UI.NODE_FILE_LIST.update(rule);
                 UI.NODE_LOG.update("\"BINARY\" msg from collector: " + Address.getString(address));

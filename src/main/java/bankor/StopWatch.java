@@ -3,7 +3,7 @@ package bankor;
 /**
  * Created by akgunduz on 10/11/15.
  */
-public class DiffTime {
+public class StopWatch {
 
     private boolean initiated = false;
     double tStart;

@@ -13,14 +13,7 @@ import java.util.List;
  */
 public class Address {
 
-    private static List<ConnectInterface> interfaceList;
-
     private Address(){}
-
-    private static String getStdString(long address) {
-
-        return Long.toString(address);
-    }
 
     public static Interfaces getInterface(long address) {
 
@@ -33,6 +26,11 @@ public class Address {
 
         return Interfaces.INTERFACE_PIPE;
 
+    }
+
+    private static String getStdString(long address) {
+
+        return Long.toString(address);
     }
 
     public static String getString(long address) {

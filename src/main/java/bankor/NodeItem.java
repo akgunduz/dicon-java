@@ -5,20 +5,27 @@ package bankor;
  */
 public class NodeItem {
 
-    public boolean isTimerActive = false;
-
     public NodeStates state = NodeStates.IDLE;
     public int usage;
     public long address;
     public long lastServedCollector;
-    public DiffTime diffTime = new DiffTime();
+    public short id;
+    public StopWatch stopWatch = new StopWatch();
     public NodeWatchdog watchdog = null;
 
-    public NodeItem(NodeStates state, int usage, long address) {
+    public NodeItem(NodeStates state, int usage, long address, short id) {
 
         this.state = state;
         this.usage = usage;
         this.address = address;
         this.lastServedCollector = 0;
+        this.id = id;
+    }
+
+    void end() {
+
+        if (watchdog != null) {
+            watchdog.end();
+        }
     }
 }

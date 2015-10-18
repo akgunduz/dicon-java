@@ -12,12 +12,12 @@ public class Distributor extends Component implements NodeCallback {
 
     ArrayDeque<Long> collectorWaitingList = new ArrayDeque<>();
 
-    DiffTime collStartTime = new DiffTime();
+    StopWatch collStartTime = new StopWatch();
 
     NodeManager nodeManager;
 
     public Distributor(int collectorIndex, int nodeIndex, String rootPath, double backupRate) {
-        super(generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath);
+        super(new Unit(HostTypes.HOST_DISTRIBUTOR, Util.getID()), generateIndex(0xFFFF, collectorIndex, nodeIndex), rootPath);
 
         nodeManager = new NodeManager(this, backupRate);
 
@@ -76,7 +76,7 @@ public class Distributor extends Component implements NodeCallback {
                 UI.DIST_NODE_LIST.update(address, NodeStates.IDLE);
                 UI.DIST_LOG.update("\"READY\" msg from node: " + Address.getString(address));
 
-                nodeManager.setIdle(address, collStartTime.stop());
+                nodeManager.setIdle(address, msg.getOwner().getID(), collStartTime.stop());
 
                 if (collectorWaitingList.size() > 0) {
 
@@ -96,7 +96,7 @@ public class Distributor extends Component implements NodeCallback {
 
                 UI.DIST_LOG.update("\"ALIVE\" msg from node: " + Address.getString(address));
 
-                if (!nodeManager.validate(address)
+                if (!nodeManager.validate(address, msg.getOwner().getID())
                         && collectorWaitingList.size() > 0) {
 
                     long collectorAddress = collectorWaitingList.poll();
@@ -164,7 +164,7 @@ public class Distributor extends Component implements NodeCallback {
 
     boolean send2CollectorMsg(long address, MessageTypes type) {
 
-        Message msg = new Message(HostTypes.HOST_DISTRIBUTOR, type, getRootPath());
+        Message msg = new Message(new Unit(HostTypes.HOST_DISTRIBUTOR), type, getRootPath());
 
         switch(type) {
 
@@ -175,16 +175,16 @@ public class Distributor extends Component implements NodeCallback {
 
             case MSGTYPE_NODE:
 
-                long nodeAddress = nodeManager.getIdle(address);
+                NodeItem node = nodeManager.getIdle(address);
 
-                if (nodeAddress != 0) {
+                if (node != null) {
 
-                    UI.DIST_NODE_LIST.update(nodeAddress, NodeStates.PREBUSY);
-                    UI.DIST_COLL_LIST.update(address, nodeAddress);
+                    UI.DIST_NODE_LIST.update(node.address, NodeStates.PREBUSY);
+                    UI.DIST_COLL_LIST.update(address, node.address);
                     UI.DIST_LOG.update("\"NODE\" msg sent to collector: " + Address.getString(address) +
-                        " with available node: " + Address.getString(nodeAddress));
+                        " with available node: " + Address.getString(node.address));
 
-                    msg.setVariant(0, nodeAddress);
+                    msg.setVariant(0, node.address);
 
                 } else {
 

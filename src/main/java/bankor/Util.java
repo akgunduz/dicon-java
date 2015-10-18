@@ -90,4 +90,8 @@ public class Util {
         }
         return new String(hexChars);
     }
+
+    public static short getID() {
+        return 0;
+    }
 }

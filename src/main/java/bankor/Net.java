@@ -21,9 +21,9 @@ public class Net extends Interface {
 
     private static List<ConnectInterface> interfaceList = null;
 
-    public Net(int index, final InterfaceCallback cb, String rootPath) {
+    public Net(Unit host, int index, final InterfaceCallback cb, String rootPath) {
 
-        super(Interfaces.INTERFACE_NET, index, cb, rootPath);
+        super(host, Interfaces.INTERFACE_NET, index, cb, rootPath);
 
     }
 
@@ -97,7 +97,7 @@ public class Net extends Interface {
     }
 
     @Override
-    void onReceive() {
+    void onReceive(Unit host) {
 
         boolean thread_started = true;
 
@@ -121,7 +121,7 @@ public class Net extends Interface {
 
                             public void run() {
 
-                                Message msg = new Message(getRootPath());
+                                Message msg = new Message(host, getRootPath());
 
                                 try {
 

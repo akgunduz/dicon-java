@@ -34,7 +34,7 @@ public abstract class BaseMessage implements MessageCallback {
 
     private static final int MAX_VARIANT = 2;
 
-    private static final int MESSAGE_HEADER_SIZE = 40 + MAX_VARIANT * 8;
+    private static final int MESSAGE_HEADER_SIZE = 44 + MAX_VARIANT * 8;
 
     private static final int MD5_DIGEST_LENGTH = 16;
 
@@ -43,6 +43,7 @@ public abstract class BaseMessage implements MessageCallback {
 
         int type;
         int priority;
+        int owner;
         long ownerAddress;
         long time;
         long deviceID;
@@ -78,22 +79,25 @@ public abstract class BaseMessage implements MessageCallback {
     ByteBuffer tmpBuf = ByteBuffer.allocate(TMP_BUFFER_SIZE);
     MessageHeader header = new MessageHeader();
 
+    Unit host;
+
     int streamFlag;
 
-    public BaseMessage() {
+    public BaseMessage(Unit host) {
 
+        setHost(host);
         setStreamFlag(STREAM_NONE);
         setPriority(DEFAULT_PRIORITY);
     }
 
-    public BaseMessage(long deviceID, int type) {
+    public BaseMessage(Unit owner, int type) {
 
-        this();
+        this(owner);
         header.time = Util.getTime().getTime();
-        header.deviceID = deviceID;
+        header.deviceID = 0;
         header.messageID = new Random(header.time).nextLong();
         header.type = type;
-
+        setOwner(owner);
     }
 
     void setStreamFlag(int flag) {
@@ -102,6 +106,22 @@ public abstract class BaseMessage implements MessageCallback {
 
     MessageTypes getType() {
         return MessageTypes.getMessage(header.type);
+    }
+
+    Unit getHost() {
+        return host;
+    }
+
+    void setHost(Unit host) {
+        this.host = host;
+    }
+
+    Unit getOwner() {
+        return new Unit(header.owner);
+    }
+
+    void setOwner(Unit owner) {
+        header.owner = owner.getUnit();
     }
 
     long getOwnerAddress() {
@@ -313,6 +333,7 @@ public abstract class BaseMessage implements MessageCallback {
 
         header.type = tmpBuf.getInt();
         header.priority = tmpBuf.getInt();
+        header.owner = tmpBuf.getInt();
         header.ownerAddress = tmpBuf.getLong();
         header.time = tmpBuf.getLong();
         header.deviceID = tmpBuf.getLong();
@@ -388,17 +409,11 @@ public abstract class BaseMessage implements MessageCallback {
         return true;
     }
 
-    boolean readBinary(ReadableByteChannel in, final String path, ByteBuffer md5, int size) {
+    boolean readBinary(ReadableByteChannel in, final String path, ByteBuffer md5, String md5Path, int size) {
 
         boolean status;
 
         try {
-
-            String dir = path.substring(0, path.lastIndexOf('/'));
-
-            if (Files.notExists(Paths.get(dir))) {
-                Files.createDirectories(Paths.get(dir));
-            }
 
             FileOutputStream file = new FileOutputStream(path);
 
@@ -411,7 +426,7 @@ public abstract class BaseMessage implements MessageCallback {
 
             if (status && md5 != null) {
 
-                file = new FileOutputStream(path + ".md5");
+                file = new FileOutputStream(md5Path);
                 out = file.getChannel();
                 String sMD5 = Util.hexToStr(md5.array());
                 if (!writeBlock(out, ByteBuffer.wrap(sMD5.getBytes()), MD5_DIGEST_LENGTH * 2)) {
@@ -539,6 +554,7 @@ public abstract class BaseMessage implements MessageCallback {
 
         tmpBuf.putInt(header.type);
         tmpBuf.putInt(header.priority);
+        tmpBuf.putInt(header.owner);
         tmpBuf.putLong(header.ownerAddress);
         tmpBuf.putLong(header.time);
         tmpBuf.putLong(header.deviceID);

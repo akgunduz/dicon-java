@@ -7,8 +7,6 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class Scheduler implements Runnable {
 
-    private static final String LOGTAG = "Scheduler";
-
     public static final int MAX_SCHEDULER_CAPACITY = 100;
 
     final ArrayBlockingQueue<Capsule> messages;

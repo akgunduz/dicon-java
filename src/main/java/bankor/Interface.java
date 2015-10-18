@@ -16,6 +16,7 @@ public abstract class Interface implements SchedulerCallback, Runnable {
     protected static final byte SHUTDOWN_NOTIFIER = 'Q';
 
     boolean initialized = false;
+    Unit host;
     protected long address;
     Scheduler scheduler;
     Pipe notifier;
@@ -27,11 +28,12 @@ public abstract class Interface implements SchedulerCallback, Runnable {
     abstract void setAddress(int interfaceIndex);
 
     abstract boolean init(int index);
-    abstract void onReceive();
+    abstract void onReceive(Unit host);
     abstract void onSend(long address, Message msg);
 
-    public Interface(Interfaces type, int interfaceIndex, final InterfaceCallback receiverCallback, String rootPath) {
+    public Interface(Unit host, Interfaces type, int interfaceIndex, final InterfaceCallback receiverCallback, String rootPath) {
 
+        this.host = host;
         this.rootPath = rootPath;
 
         scheduler = new Scheduler(Scheduler.MAX_SCHEDULER_CAPACITY);
@@ -92,7 +94,7 @@ public abstract class Interface implements SchedulerCallback, Runnable {
     @Override
     public void run() {
 
-        onReceive();
+        onReceive(host);
     }
 
     boolean push(MessageDirection type, long target, Message msg) {

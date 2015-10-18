@@ -18,29 +18,26 @@ public class FileContent extends Content {
     private static final int MD5_DIGEST_LENGTH = 16;
 
     private String path;
+    private String absPath;
+    private String md5Path;
     private ByteBuffer md5 = ByteBuffer.allocate(MD5_DIGEST_LENGTH);
     private boolean flaggedToSent;
+    private FileTypes fileType;
 
     public FileContent() {
 
         setValid(false);
-        flaggedToSent = true;
+        setFlaggedToSent(true);
     }
 
-    public FileContent(String rootPath, String path, String sMD5) {
+    public FileContent(Unit host, Unit node, String rootPath, String path, FileTypes type) {
 
-        this.path = path;
-        String absPath = rootPath + path;
+        //TODO check file first
+
+        setFile(host, node, rootPath, path, fileType);
 
         setValid(true);
-        flaggedToSent = true;
-
-        if (sMD5 != null && !sMD5.isEmpty()) {
-            md5.put(Util.strToHex(sMD5));
-            return;
-        }
-
-        String md5Path = absPath + ".md5";
+        setFlaggedToSent(true);
 
         try {
 
@@ -93,8 +90,12 @@ public class FileContent extends Content {
         return path;
     }
 
-    public void setPath(String path) {
-        this.path = path;
+    public String getAbsPath() {
+        return absPath;
+    }
+
+    public String getMD5Path() {
+        return md5Path;
     }
 
     public ByteBuffer getMD5() {
@@ -113,11 +114,52 @@ public class FileContent extends Content {
         this.flaggedToSent = flaggedToSent;
     }
 
-    public void set(FileContent content) {
+    FileTypes getFileType() {
+        return fileType;
+    }
 
-        path = content.getPath();
-        md5 = content.getMD5();
-        flaggedToSent = content.isFlaggedToSent();
-        setValid(content.isValid());
+    void setFile(Unit host, Unit node, String rootPath,
+                 String path, FileTypes fileType) {
+
+        this.path = path;
+        this.fileType = fileType;
+
+        if (host.getType() == HostTypes.HOST_COLLECTOR) {
+
+            switch (fileType) {
+                case FILE_RULE:
+                    absPath = rootPath;
+                    break;
+                case FILE_COMMON:
+                    absPath = rootPath + "common/";
+                    break;
+                case FILE_ARCH:
+                    absPath = rootPath + "arch/" + ArchTypes.getDir(node.getID()) + "/";
+                    break;
+            }
+
+        } else {
+            absPath = rootPath;
+        }
+
+        md5Path = rootPath + "md5/";
+
+        try {
+
+            if (Files.notExists(Paths.get(absPath))) {
+                Files.createDirectories(Paths.get(absPath));
+            }
+
+            if (Files.notExists(Paths.get(md5Path))) {
+                Files.createDirectories(Paths.get(md5Path));
+            }
+
+        } catch (Exception e) {
+            System.out.println("FileContent -> " + e.getMessage());
+        }
+
+        absPath += path;
+
+        md5Path += path + ".md5";
     }
 }

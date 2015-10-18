@@ -15,6 +15,9 @@ public class Rule {
 
     public static final String RULE_FILE = "Rule.json";
 
+    private Unit unitHost;
+    private Unit unitNode;
+
     private FileContent content;
     private String rootPath;
     private boolean valid;
@@ -24,15 +27,17 @@ public class Rule {
 
     private Map<String, RuleCallback> ruleMap = new HashMap<>(RuleTypes.getSize());
 
-    public Rule(String rootPath, String path) {
+    public Rule(Unit host, Unit node, String rootPath) {
+        this(host, node, rootPath, null);
+    }
 
+    public Rule(Unit host, Unit node, String rootPath, FileContent fileContent) {
+
+        this.unitHost = host;
+        this.unitNode = node;
         this.rootPath = rootPath;
         this.valid = false;
         this.parallel = false;
-
-        if (path.isEmpty()) {
-            return;
-        }
 
         for( int i = 0; i < contentList.length; i++) {
             contentList[i] = new ArrayList<>();
@@ -43,14 +48,20 @@ public class Rule {
         ruleMap.put(RuleTypes.RULE_PARAMETERS.getName(), parseParametersNode);
         ruleMap.put(RuleTypes.RULE_EXECUTORS.getName(), parseExecutorsNode);
 
-        String abspath = rootPath + path;
-        content = new FileContent(rootPath, path, null);
-        if (!content.isValid()) {
-            System.out.println("Rule.Rule -> " + "Can not read rule file");
-            return;
+        if (fileContent == null) {
+
+            content = new FileContent(host, node, rootPath, RULE_FILE, FileTypes.FILE_RULE);
+            if (!content.isValid()) {
+                System.out.println("Rule.Rule -> " + "Can not read rule file");
+                return;
+            }
+
+        } else {
+
+            content = fileContent;
         }
 
-        byte[] buffer = readFile(abspath);
+        byte[] buffer = readFile(content.getAbsPath());
         if (buffer == null) {
             System.out.println("Rule.Rule -> " + "Read problem in rule file");
             return;
@@ -64,12 +75,6 @@ public class Rule {
         content.setFlaggedToSent(true);
 
         valid = true;
-
-    }
-
-    public Rule(String rootPath) {
-
-        this(rootPath, RULE_FILE);
 
     }
 
@@ -133,9 +138,12 @@ public class Rule {
                         System.out.println("Rule.parseFilesNode -> " + "Invalid JSON Files Node");
                     }
 
-                    FileContent fc = new FileContent(rootPath, file.getString(0), file.getString(1));
-                    contentList[RuleTypes.RULE_FILES.ordinal()].add(fc);
+                    String path = file.getString(0);
+                    FileTypes fileType = file.getString(1).equals("c") ? FileTypes.FILE_COMMON : FileTypes.FILE_ARCH;
 
+                    FileContent fc = new FileContent(unitHost, unitNode, getRootPath(), path, fileType);
+
+                    contentList[RuleTypes.RULE_FILES.ordinal()].add(fc);
                 }
 
             } catch (JSONException e) {
@@ -245,7 +253,7 @@ public class Rule {
         }
     }
 
-    FileContent getRuleFile() {
+    FileContent getContent() {
         return content;
     }
 
@@ -266,19 +274,6 @@ public class Rule {
 
     public boolean isValid() {
         return valid;
-    }
-
-    boolean updateFileContent(FileContent ref) {
-
-        for (int i = 0; i < getContentCount(RuleTypes.RULE_FILES); i++) {
-
-            FileContent content = (FileContent) getContent(RuleTypes.RULE_FILES, i);
-            if (content.getPath().equals(ref.getPath())) {
-                content.set(ref);
-            }
-        }
-
-        return true;
     }
 
     String getRootPath() {
