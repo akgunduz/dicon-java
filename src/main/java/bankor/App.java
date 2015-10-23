@@ -23,13 +23,9 @@ import java.util.Map;
 public class App extends Application {
 
     @FXML
-    private ChoiceBox<String> distCollInterface;
+    private ChoiceBox<String> distConnectInterface;
     @FXML
-    private ChoiceBox<String> distNodeInterface;
-    @FXML
-    private Label distCollInterfaceAddress;
-    @FXML
-    private Label distNodeInterfaceAddress;
+    private Label distAddress;
     @FXML
     private TextField distBackupRate;
     @FXML
@@ -57,13 +53,9 @@ public class App extends Application {
 
 
     @FXML
-    private ChoiceBox<String> collDistInterface;
+    private ChoiceBox<String> collConnectInterface;
     @FXML
-    private ChoiceBox<String> collNodeInterface;
-    @FXML
-    private Label collDistInterfaceAddress;
-    @FXML
-    private Label collNodeInterfaceAddress;
+    private Label collAddress;
     @FXML
     private Label collDistAddress;
     @FXML
@@ -87,13 +79,9 @@ public class App extends Application {
 
 
     @FXML
-    private ChoiceBox<String> nodeDistInterface;
+    private ChoiceBox<String> nodeConnectInterface;
     @FXML
-    private ChoiceBox<String> nodeCollInterface;
-    @FXML
-    private Label nodeDistInterfaceAddress;
-    @FXML
-    private Label nodeCollInterfaceAddress;
+    private Label nodeAddress;
     @FXML
     private Label nodeState;
     @FXML
@@ -152,10 +140,8 @@ public class App extends Application {
             interfaceList.add(ci.type.getName() + " --> " + ci.name);
         }
 
-        distCollInterface.setItems(interfaceList);
-        distCollInterface.getSelectionModel().select(0);
-        distNodeInterface.setItems(interfaceList);
-        distNodeInterface.getSelectionModel().select(0);
+        distConnectInterface.setItems(interfaceList);
+        distConnectInterface.getSelectionModel().select(0);
 
         distCollAddressCol.setCellValueFactory(new PropertyValueFactory<>("fieldLeft"));
         distCollNodeCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
@@ -163,19 +149,15 @@ public class App extends Application {
         distNodeStateCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
 
 
-        collDistInterface.setItems(interfaceList);
-        collDistInterface.getSelectionModel().select(0);
-        collNodeInterface.setItems(interfaceList);
-        collNodeInterface.getSelectionModel().select(0);
+        collConnectInterface.setItems(interfaceList);
+        collConnectInterface.getSelectionModel().select(0);
 
         collFileNameCol.setCellValueFactory(new PropertyValueFactory<>("fieldLeft"));
         collFileStateCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
 
 
-        nodeDistInterface.setItems(interfaceList);
-        nodeDistInterface.getSelectionModel().select(0);
-        nodeCollInterface.setItems(interfaceList);
-        nodeCollInterface.getSelectionModel().select(0);
+        nodeConnectInterface.setItems(interfaceList);
+        nodeConnectInterface.getSelectionModel().select(0);
 
         nodeFileNameCol.setCellValueFactory(new PropertyValueFactory<>("fieldLeft"));
         nodeFileStateCol.setCellValueFactory(new PropertyValueFactory<>("fieldRight"));
@@ -240,8 +222,8 @@ public class App extends Application {
 
             String path = System.getProperty("user.dir") + "/" + Distributor.DISTRIBUTOR_PATH + "/";
 
-            distObject = new Distributor(distCollInterface.getSelectionModel().getSelectedIndex(),
-                    distNodeInterface.getSelectionModel().getSelectedIndex(), path, 0);
+            distObject = new Distributor(distConnectInterface.getSelectionModel().getSelectedIndex(),
+                    distConnectInterface.getSelectionModel().getSelectedIndex(), path, 0);
 
             distInitBtn.setText("Stop");
 
@@ -251,8 +233,7 @@ public class App extends Application {
             distObject = null;
 
             distInitBtn.setText("Init");
-            distCollInterfaceAddress.setText("");
-            distNodeInterfaceAddress.setText("");
+            distAddress.setText("");
 
         }
     }
@@ -269,8 +250,7 @@ public class App extends Application {
         @Override
         public void onUpdate(Object... args) {
 
-            distCollInterfaceAddress.setText(Address.getString((Long) args[0]));
-            distNodeInterfaceAddress.setText(Address.getString((Long) args[1]));
+            distAddress.setText(Address.getString((Long) args[0]));
         }
     };
 
@@ -349,8 +329,8 @@ public class App extends Application {
 
             String path = System.getProperty("user.dir") + "/" + Collector.COLLECTOR_PATH + "/";
 
-            collObject = new Collector(collDistInterface.getSelectionModel().getSelectedIndex(),
-                    collNodeInterface.getSelectionModel().getSelectedIndex(), path);
+            collObject = new Collector(collConnectInterface.getSelectionModel().getSelectedIndex(),
+                    collConnectInterface.getSelectionModel().getSelectedIndex(), path);
 
             collInitBtn.setText("Stop");
 
@@ -360,8 +340,7 @@ public class App extends Application {
             collObject = null;
 
             collInitBtn.setText("Init");
-            collDistInterfaceAddress.setText("");
-            collNodeInterfaceAddress.setText("");
+            collAddress.setText("");
 
         }
     }
@@ -379,8 +358,7 @@ public class App extends Application {
         @Override
         public void onUpdate(Object... args) {
 
-            collDistInterfaceAddress.setText(Address.getString((Long) args[0]));
-            collNodeInterfaceAddress.setText(Address.getString((Long) args[1]));
+            collAddress.setText(Address.getString((Long) args[0]));
         }
     };
 
@@ -478,8 +456,8 @@ public class App extends Application {
                 return;
             }
 
-            nodeObject = new Node(nodeDistInterface.getSelectionModel().getSelectedIndex(),
-                    nodeCollInterface.getSelectionModel().getSelectedIndex(), path);
+            nodeObject = new Node(nodeConnectInterface.getSelectionModel().getSelectedIndex(),
+                    nodeConnectInterface.getSelectionModel().getSelectedIndex(), path);
 
             nodeInitBtn.setText("Stop");
 
@@ -489,8 +467,7 @@ public class App extends Application {
             nodeObject = null;
 
             nodeInitBtn.setText("Init");
-            nodeDistInterfaceAddress.setText("");
-            nodeCollInterfaceAddress.setText("");
+            nodeAddress.setText("");
 
         }
     }
@@ -499,8 +476,7 @@ public class App extends Application {
         @Override
         public void onUpdate(Object... args) {
 
-            nodeDistInterfaceAddress.setText(Address.getString((Long) args[0]));
-            nodeCollInterfaceAddress.setText(Address.getString((Long) args[1]));
+            nodeAddress.setText(Address.getString((Long) args[0]));
         }
     };
 
